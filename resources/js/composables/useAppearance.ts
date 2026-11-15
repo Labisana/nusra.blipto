@@ -56,6 +56,21 @@ const getStoredAppearance = () => {
     return localStorage.getItem('appearance') as Appearance | null;
 };
 
+// The server applies the theme from the cookie before the app boots, so it is
+// the fallback when localStorage is unavailable or has been cleared.
+const getCookieAppearance = (): Appearance | null => {
+    if (typeof document === 'undefined') {
+        return null;
+    }
+
+    const match = document.cookie.match(/(?:^|;\s*)appearance=([^;]+)/);
+
+    return (match?.[1] as Appearance) ?? null;
+};
+
+const getInitialAppearance = (): Appearance =>
+    getStoredAppearance() ?? getCookieAppearance() ?? 'system';
+
 const prefersDark = (): boolean => {
     if (typeof window === 'undefined') {
         return false;
@@ -64,10 +79,13 @@ const prefersDark = (): boolean => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-const handleSystemThemeChange = () => {
-    const currentAppearance = getStoredAppearance();
+// Reactive mirror of the OS preference so components (theme toggle, settings
+// tabs) re-render when the system theme changes while "system" is selected.
+const systemPrefersDark = ref(prefersDark());
 
-    updateTheme(currentAppearance || 'system');
+const handleSystemThemeChange = () => {
+    systemPrefersDark.value = prefersDark();
+    updateTheme(getInitialAppearance());
 };
 
 export function initializeTheme(): void {
@@ -76,29 +94,30 @@ export function initializeTheme(): void {
     }
 
     // Initialize theme from saved preference or default to system...
-    const savedAppearance = getStoredAppearance();
-    updateTheme(savedAppearance || 'system');
+    updateTheme(getInitialAppearance());
 
     // Set up system theme change listener...
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
-const appearance = ref<Appearance>('system');
+// Read the stored preference synchronously on the client so the very first
+// render already matches the theme applied to <html>. On the server there is
+// no storage, so the value stays at the default and components must not rely
+// on it before mounting.
+const appearance = ref<Appearance>(getInitialAppearance());
 
 export function useAppearance(): UseAppearanceReturn {
     onMounted(() => {
-        const savedAppearance = localStorage.getItem(
-            'appearance',
-        ) as Appearance | null;
+        const savedAppearance = getStoredAppearance();
 
-        if (savedAppearance) {
+        if (savedAppearance && savedAppearance !== appearance.value) {
             appearance.value = savedAppearance;
         }
     });
 
     const resolvedAppearance = computed<ResolvedAppearance>(() => {
         if (appearance.value === 'system') {
-            return prefersDark() ? 'dark' : 'light';
+            return systemPrefersDark.value ? 'dark' : 'light';
         }
 
         return appearance.value;

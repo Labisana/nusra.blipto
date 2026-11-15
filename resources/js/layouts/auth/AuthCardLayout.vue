@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import {
     Card,
     CardContent,
@@ -25,9 +24,16 @@ defineProps<{
                 :href="home()"
                 class="flex items-center gap-2 self-center font-medium"
             >
-                <div class="flex h-9 w-9 items-center justify-center">
-                    <AppLogoIcon
-                        class="size-9 fill-current text-black dark:text-white"
+                <div class="flex h-16 items-center justify-center">
+                    <img
+                        src="/images/blip-logo.png"
+                        alt="BLiP"
+                        class="h-16 w-auto dark:hidden"
+                    />
+                    <img
+                        src="/images/blip-logo-white.png"
+                        alt="BLiP"
+                        class="hidden h-16 w-auto dark:block"
                     />
                 </div>
             </Link>

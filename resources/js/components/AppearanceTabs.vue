@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Monitor, Moon, Sun } from '@lucide/vue';
+import { onMounted, ref } from 'vue';
 import { useAppearance } from '@/composables/useAppearance';
 
 const { appearance, updateAppearance } = useAppearance();
@@ -9,6 +10,18 @@ const tabs = [
     { value: 'dark', Icon: Moon, label: 'Dark' },
     { value: 'system', Icon: Monitor, label: 'System' },
 ] as const;
+
+// The saved preference only exists in the browser, so the server cannot know
+// which tab is active. Keep the markup neutral until mounted to avoid a
+// hydration mismatch that would leave stale highlight classes behind.
+const mounted = ref(false);
+
+onMounted(() => {
+    mounted.value = true;
+});
+
+const isActive = (value: (typeof tabs)[number]['value']) =>
+    mounted.value && appearance.value === value;
 </script>
 
 <template>
@@ -21,7 +34,7 @@ const tabs = [
             @click="updateAppearance(value)"
             :class="[
                 'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
-                appearance === value
+                isActive(value)
                     ? 'bg-white shadow-xs dark:bg-neutral-700 dark:text-neutral-100'
                     : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60',
             ]"
