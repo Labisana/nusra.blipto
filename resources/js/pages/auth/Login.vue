@@ -113,27 +113,27 @@ function useDemoAccount(account: DemoAccount) {
 
             <Button
                 type="submit"
-                class="mt-4 w-full"
+                class="mt-4 w-full bg-gradient-to-r from-[#fb4f00] to-[#ff6b26] text-white shadow-md shadow-[#fb4f00]/25 hover:from-[#e04600] hover:to-[#fb4f00] hover:shadow-lg hover:shadow-[#fb4f00]/30 active:scale-[0.99] transition-all font-semibold"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
             >
                 <Spinner v-if="processing" />
-                Log in
+                Masuk ke Sistem
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+        <div class="text-center text-xs text-muted-foreground">
+            Belum memiliki akun?
+            <TextLink :href="register()" :tabindex="5" class="font-semibold text-[#fb4f00] hover:underline ml-1">Daftar Akun</TextLink>
         </div>
     </Form>
 
     <div v-if="demoAccounts?.length" class="mt-6 flex flex-col gap-3">
         <div class="flex items-center gap-3">
-            <span class="h-px flex-1 bg-border" />
-            <span class="text-xs font-medium tracking-wide text-muted-foreground uppercase">Akun demo</span>
-            <span class="h-px flex-1 bg-border" />
+            <span class="h-px flex-1 bg-border/80" />
+            <span class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Akses Cepat Demo</span>
+            <span class="h-px flex-1 bg-border/80" />
         </div>
 
         <div class="grid gap-2">
@@ -141,26 +141,32 @@ function useDemoAccount(account: DemoAccount) {
                 v-for="account in demoAccounts"
                 :key="account.email"
                 type="button"
-                class="group flex w-full items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/50 hover:bg-muted/50"
+                class="group relative flex w-full items-center justify-between gap-3 overflow-hidden rounded-xl border border-border/80 bg-background/60 p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[#fb4f00]/40 hover:bg-[#fb4f00]/5 hover:shadow-sm"
                 :title="`Isi email & password ${account.role_label}`"
                 @click="useDemoAccount(account)"
             >
-                <span class="min-w-0">
-                    <span class="flex flex-wrap items-center gap-1.5">
-                        <span class="rounded-full border bg-muted px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span 
+                            class="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase"
+                            :class="account.role === 'spv' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300' : account.role === 'admin' ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'"
+                        >
                             {{ account.role_label }}
                         </span>
-                        <span class="text-[11px] text-muted-foreground">{{ account.description }}</span>
-                    </span>
-                    <span class="mt-1 block truncate font-mono text-xs text-foreground">{{ account.email }}</span>
-                </span>
-                <span class="shrink-0 text-xs font-medium text-primary opacity-70 group-hover:opacity-100">Gunakan</span>
+                        <span class="text-[11px] text-muted-foreground truncate">{{ account.description }}</span>
+                    </div>
+                    <span class="mt-1 block truncate font-mono text-xs text-foreground font-medium">{{ account.email }}</span>
+                </div>
+                <div class="shrink-0 flex items-center gap-1 rounded-md bg-[#fb4f00]/10 px-2 py-1 text-xs font-semibold text-[#fb4f00] transition-colors group-hover:bg-[#fb4f00] group-hover:text-white">
+                    <span>Pilih</span>
+                    <span class="text-xs">&rarr;</span>
+                </div>
             </button>
         </div>
 
         <p class="text-center text-[11px] text-muted-foreground">
-            Klik akun untuk mengisi otomatis. Kata sandi semua akun demo:
-            <span class="font-mono text-foreground">password</span>
+            Klik akun untuk mengisi otomatis. Kata sandi default:
+            <span class="font-mono font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded">password</span>
         </p>
     </div>
 </template>

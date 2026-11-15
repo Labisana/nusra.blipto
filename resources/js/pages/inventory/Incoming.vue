@@ -186,19 +186,25 @@ function lineError(index: number, key: 'item_id' | 'quantity' | 'serials'): stri
 <template>
     <Head title="Barang Masuk" />
 
-    <div class="flex flex-1 flex-col gap-4 p-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-1 flex-col gap-5 p-4 md:p-6">
+        <!-- Header -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight">Barang Masuk</h1>
-                <p class="text-sm text-muted-foreground">Catat penerimaan barang (serial & non-serial). Satu transaksi dapat berisi lebih dari satu barang.</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-bold tracking-tight text-foreground">Barang Masuk</h1>
+                    <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        {{ filteredRows.length }} Baris
+                    </span>
+                </div>
+                <p class="mt-0.5 text-xs text-muted-foreground">Pencatatan penerimaan unit baru (FPB) maupun perangkat bongkaran (Dismantle).</p>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="rounded-md border bg-card px-2.5 py-1.5 text-xs text-muted-foreground">
-                    Akses: <span class="font-medium text-foreground">{{ roleLabel }}</span>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <span class="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-2xs">
+                    Peran: <span class="font-semibold text-foreground">{{ roleLabel }}</span>
                 </span>
                 <button
                     type="button"
-                    class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-emerald-600/25 transition-all hover:brightness-105 active:scale-95"
                     @click="openForm"
                 >
                     <Plus class="size-4" /> Input Barang Masuk
@@ -206,79 +212,101 @@ function lineError(index: number, key: 'item_id' | 'quantity' | 'serials'): stri
             </div>
         </div>
 
-        <div class="rounded-xl border bg-card shadow-sm">
-            <div class="flex flex-col gap-2 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
-                <h2 class="font-medium">Riwayat Barang Masuk</h2>
-                <div class="relative w-full sm:w-64">
-                    <Search class="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-                    <input v-model="search" type="text" placeholder="Cari ref / barang..." class="w-full rounded-md border bg-background py-2 pl-8 pr-3 text-sm" />
+        <!-- History Table Card -->
+        <div class="rounded-2xl border border-border/80 bg-card shadow-2xs">
+            <div class="flex flex-col gap-3 border-b border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="font-semibold text-foreground text-sm">Riwayat Barang Masuk</h2>
+                    <p class="text-xs text-muted-foreground">Daftar transaksi penerimaan barang dan log mutasi serial</p>
+                </div>
+                <div class="relative w-full sm:w-72">
+                    <Search class="pointer-events-none absolute left-3 top-2 size-3.5 text-muted-foreground" />
+                    <input v-model="search" type="text" placeholder="Cari ref, barang, atau pelanggan..." class="w-full rounded-xl border border-border bg-background py-1.5 pl-8.5 pr-8 text-xs transition-colors hover:border-[#fb4f00]/40 focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden" />
+                    <button v-if="search" class="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground" @click="search = ''">
+                        <X class="size-3.5" />
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-muted/50 text-left text-xs text-muted-foreground">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         <tr>
-                            <th class="px-4 py-2 font-medium">Tanggal</th>
-                            <th class="px-4 py-2 font-medium">Ref</th>
-                            <th class="px-4 py-2 font-medium">Activity</th>
-                            <th class="px-4 py-2 font-medium">Pelanggan</th>
-                            <th class="px-4 py-2 font-medium">Tipe</th>
-                            <th class="px-4 py-2 font-medium">Barang</th>
-                            <th class="px-4 py-2 font-medium">Jenis</th>
-                            <th class="px-4 py-2 font-medium">Qty</th>
-                            <th class="px-4 py-2 font-medium">Serial</th>
-                            <th class="px-4 py-2 font-medium">User</th>
-                            <th class="px-4 py-2 font-medium text-right">Aksi</th>
+                            <th class="px-4 py-3">Tanggal</th>
+                            <th class="px-4 py-3">No. Ref</th>
+                            <th class="px-4 py-3">Activity</th>
+                            <th class="px-4 py-3">Pelanggan</th>
+                            <th class="px-4 py-3">Tipe</th>
+                            <th class="px-4 py-3">Nama Barang</th>
+                            <th class="px-4 py-3">Jenis</th>
+                            <th class="px-4 py-3 text-right">Qty</th>
+                            <th class="px-4 py-3">Serial Number</th>
+                            <th class="px-4 py-3">Petugas</th>
+                            <th class="px-4 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
-                        <tr v-for="r in filteredRows" :key="r.id" class="hover:bg-muted/30">
-                            <td class="px-4 py-2 whitespace-nowrap">{{ r.date }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap font-medium">{{ r.ref }}</td>
-                            <td class="px-4 py-2"><span class="inline-flex rounded-full border px-2 py-0.5 text-xs">{{ r.activity }}</span></td>
-                            <td class="px-4 py-2 min-w-[160px]">{{ r.customer }}</td>
-                            <td class="px-4 py-2">{{ r.tipe }}</td>
-                            <td class="px-4 py-2 min-w-[160px]">{{ r.item }}</td>
-                            <td class="px-4 py-2"><span class="inline-flex rounded-full border px-2 py-0.5 text-xs">{{ r.type }}</span></td>
-                            <td class="px-4 py-2 text-emerald-600 font-medium">+{{ r.qty }}</td>
-                            <td class="px-4 py-2 max-w-[160px] truncate" :title="r.serials">{{ r.serials }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap">{{ r.user }}</td>
-                            <td class="px-4 py-2 text-right whitespace-nowrap">
-                                <button class="rounded px-2 py-1 text-xs hover:bg-muted disabled:opacity-40" :disabled="!canManage" @click="openEditById(r.transaction_id)">Edit</button>
-                                <button class="rounded px-2 py-1 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-40" :disabled="!canManage" @click="destroy(r.transaction_id)">Hapus</button>
+                    <tbody class="divide-y divide-border/50 text-xs">
+                        <tr v-for="r in filteredRows" :key="r.id" class="transition-colors hover:bg-emerald-500/[0.02] dark:hover:bg-emerald-500/[0.05]">
+                            <td class="px-4 py-3 font-mono text-muted-foreground whitespace-nowrap">{{ r.date }}</td>
+                            <td class="px-4 py-3 font-mono font-semibold text-foreground whitespace-nowrap">{{ r.ref }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-bold text-foreground">
+                                    {{ r.activity }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 min-w-[160px] font-medium text-foreground">{{ r.customer }}</td>
+                            <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ r.tipe }}</td>
+                            <td class="px-4 py-3 min-w-[180px] font-semibold text-foreground">{{ r.item }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-medium bg-background">
+                                    {{ r.type }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">+{{ r.qty }}</td>
+                            <td class="px-4 py-3 max-w-[160px] truncate font-mono text-[11px] text-muted-foreground" :title="r.serials">{{ r.serials }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1 rounded bg-muted/70 px-2 py-0.5 font-medium text-foreground">
+                                    {{ r.user }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1">
+                                    <button class="rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium hover:border-[#fb4f00]/40 hover:text-[#fb4f00] transition-colors disabled:opacity-40" :disabled="!canManage" @click="openEditById(r.transaction_id)">Edit</button>
+                                    <button class="rounded-lg border border-destructive/20 bg-background px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40" :disabled="!canManage" @click="destroy(r.transaction_id)">Hapus</button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="!filteredRows.length">
-                            <td colspan="11" class="px-4 py-6 text-center text-muted-foreground">Belum ada transaksi barang masuk.</td>
+                            <td colspan="11" class="px-4 py-8 text-center text-muted-foreground">Belum ada transaksi barang masuk yang sesuai.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="border-t px-4 py-2 text-xs text-muted-foreground">
-                Menampilkan {{ filteredRows.length }} baris dari {{ transactions.length }} transaksi.
-                <span v-if="!canManage">Aksi edit/hapus dikunci untuk peran Teknisi.</span>
+            <div class="border-t border-border/70 px-4 py-2.5 text-xs text-muted-foreground flex items-center justify-between">
+                <span>Menampilkan {{ filteredRows.length }} baris dari {{ transactions.length }} transaksi tercatat.</span>
+                <span v-if="!canManage" class="text-amber-600 dark:text-amber-400 font-medium">Akses edit/hapus dikunci untuk Teknisi</span>
             </div>
         </div>
     </div>
 
     <Teleport to="body">
-        <div v-if="showForm" class="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-            <div class="absolute inset-0 bg-black/50" @click="closeForm"></div>
-            <div class="relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl border bg-card shadow-xl sm:max-w-2xl sm:rounded-xl">
-                <div class="flex items-center justify-between border-b px-4 py-3">
+        <div v-if="showForm" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity" @click="closeForm"></div>
+            <div class="relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl border border-border bg-card shadow-2xl sm:max-w-2xl sm:rounded-2xl">
+                <div class="relative flex items-center justify-between border-b border-border/80 px-5 py-4">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500"></div>
                     <div>
-                        <h2 class="font-medium">{{ editingId ? 'Edit Barang Masuk' : 'Input Barang Masuk' }}</h2>
-                        <p class="text-xs text-muted-foreground">Pilih activity. Dismantle wajib pilih pelanggan; FPB tanpa pelanggan.</p>
+                        <h2 class="font-bold text-foreground text-base">{{ editingId ? 'Edit Transaksi Barang Masuk' : 'Input Barang Masuk Baru' }}</h2>
+                        <p class="text-xs text-muted-foreground">Pilih jenis activity (FPB penerimaan baru atau Dismantle eks-pelanggan).</p>
                     </div>
-                    <button type="button" class="rounded-md p-1.5 hover:bg-muted" @click="closeForm" aria-label="Tutup">
+                    <button type="button" class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" @click="closeForm" aria-label="Tutup">
                         <X class="size-4" />
                     </button>
                 </div>
-                <form class="overflow-y-auto p-4" @submit.prevent="submit">
-                    <div class="grid gap-3">
-                        <div class="grid gap-1">
-                            <label class="text-xs font-medium text-muted-foreground">Activity <span class="text-destructive">*</span></label>
-                            <select v-model="form.activity" required class="rounded-md border bg-background px-3 py-2 text-sm">
+                <form class="overflow-y-auto p-5" @submit.prevent="submit">
+                    <div class="grid gap-4">
+                        <div class="grid gap-1.5">
+                            <label class="text-xs font-semibold text-foreground">Jenis Activity <span class="text-destructive">*</span></label>
+                            <select v-model="form.activity" required class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden">
                                 <option value="">Pilih activity...</option>
                                 <option v-for="activity in activities" :key="activity.value" :value="activity.value">{{ activity.label }}</option>
                             </select>
@@ -286,9 +314,9 @@ function lineError(index: number, key: 'item_id' | 'quantity' | 'serials'): stri
                         </div>
 
                         <template v-if="isDismantle">
-                            <div class="grid gap-1">
-                                <label class="text-xs font-medium text-muted-foreground">Nama Pelanggan <span class="text-destructive">*</span></label>
-                                <select v-model="form.customer_id" required class="rounded-md border bg-background px-3 py-2 text-sm">
+                            <div class="grid gap-1.5">
+                                <label class="text-xs font-semibold text-foreground">Pelanggan Asal (Dismantle) <span class="text-destructive">*</span></label>
+                                <select v-model="form.customer_id" required class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden">
                                     <option value="">Pilih pelanggan...</option>
                                     <option v-for="customer in customers" :key="customer.id" :value="customer.id">
                                         {{ customer.nama_pelanggan }} (CID: {{ customer.cid ?? '-' }})
@@ -296,65 +324,65 @@ function lineError(index: number, key: 'item_id' | 'quantity' | 'serials'): stri
                                 </select>
                                 <p v-if="form.errors.customer_id" class="text-xs text-destructive">{{ form.errors.customer_id }}</p>
                             </div>
-                            <div class="grid gap-1">
-                                <label class="text-xs font-medium text-muted-foreground">Tipe Pelanggan</label>
+                            <div class="grid gap-1.5">
+                                <label class="text-xs font-semibold text-muted-foreground">Tipe Pelanggan</label>
                                 <input
                                     :value="selectedCustomer?.tipe_pelanggan ?? '-'"
                                     type="text"
                                     readonly
-                                    class="rounded-md border bg-muted/40 px-3 py-2 text-sm text-foreground"
+                                    class="rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-foreground"
                                     placeholder="Otomatis dari data pelanggan"
                                 />
-                                <p class="text-[11px] text-muted-foreground">Tipe pelanggan (Busol/Broadband) mengikuti pelanggan yang dipilih.</p>
+                                <p class="text-[11px] text-muted-foreground">Tipe pelanggan (Busol/Broadband) sinkron otomatis.</p>
                             </div>
                         </template>
 
                         <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="grid gap-1">
-                                <label class="text-xs font-medium text-muted-foreground">Tanggal <span class="text-destructive">*</span></label>
-                                <input v-model="form.transaction_date" type="date" required class="rounded-md border bg-background px-3 py-2 text-sm" />
+                            <div class="grid gap-1.5">
+                                <label class="text-xs font-semibold text-foreground">Tanggal Masuk <span class="text-destructive">*</span></label>
+                                <input v-model="form.transaction_date" type="date" required class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden" />
                                 <p v-if="form.errors.transaction_date" class="text-xs text-destructive">{{ form.errors.transaction_date }}</p>
                             </div>
-                            <div class="grid gap-1">
-                                <label class="text-xs font-medium text-muted-foreground">No. Referensi (PO/FPB/Retur)</label>
-                                <input v-model="form.reference" type="text" placeholder="Otomatis jika kosong" class="rounded-md border bg-background px-3 py-2 text-sm" />
+                            <div class="grid gap-1.5">
+                                <label class="text-xs font-semibold text-foreground">No. Referensi (PO / FPB / Retur)</label>
+                                <input v-model="form.reference" type="text" placeholder="Otomatis jika dikosongkan" class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden" />
                                 <p v-if="form.errors.reference" class="text-xs text-destructive">{{ form.errors.reference }}</p>
                             </div>
                         </div>
-                        <div class="grid gap-1">
-                            <label class="text-xs font-medium text-muted-foreground">Catatan</label>
-                            <input v-model="form.note" type="text" class="rounded-md border bg-background px-3 py-2 text-sm" />
+                        <div class="grid gap-1.5">
+                            <label class="text-xs font-semibold text-foreground">Catatan Tambahan</label>
+                            <input v-model="form.note" type="text" placeholder="Keterangan kondisi / lokasi barang" class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden" />
                         </div>
 
-                        <div class="mt-1 flex items-center justify-between border-t pt-3">
+                        <div class="mt-2 flex items-center justify-between border-t border-border/70 pt-3">
                             <div>
-                                <h3 class="text-sm font-medium">Daftar Barang Masuk</h3>
-                                <p class="text-[11px] text-muted-foreground">Tambahkan lebih dari 1 barang dalam satu transaksi.</p>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">Daftar Barang Masuk</h3>
+                                <p class="text-[11px] text-muted-foreground">Dapat menambahkan beberapa barang sekaligus.</p>
                             </div>
-                            <button type="button" class="inline-flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-xs font-medium hover:bg-muted" @click="addItem">
-                                <Plus class="size-3.5" /> Tambah Barang
+                            <button type="button" class="inline-flex items-center gap-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors" @click="addItem">
+                                <Plus class="size-3.5" /> Tambah Baris
                             </button>
                         </div>
 
                         <p v-if="form.errors.items" class="text-xs text-destructive">{{ form.errors.items }}</p>
 
                         <div class="grid gap-3">
-                            <div v-for="(line, idx) in form.items" :key="idx" class="rounded-lg border bg-muted/20 p-3">
-                                <div class="mb-2 flex items-center justify-between">
-                                    <span class="text-xs font-medium text-muted-foreground">Barang #{{ idx + 1 }}</span>
+                            <div v-for="(line, idx) in form.items" :key="idx" class="rounded-xl border border-border/80 bg-muted/20 p-3.5 transition-all">
+                                <div class="mb-2 flex items-center justify-between border-b border-border/60 pb-2">
+                                    <span class="text-xs font-bold text-foreground">Barang #{{ idx + 1 }}</span>
                                     <button
                                         type="button"
-                                        class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-40"
+                                        class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-40 transition-colors"
                                         :disabled="form.items.length === 1"
                                         @click="removeItem(idx)"
                                     >
-                                        <Trash2 class="size-3.5" /> Hapus
+                                        <Trash2 class="size-3" /> Hapus
                                     </button>
                                 </div>
                                 <div class="grid gap-3">
-                                    <div class="grid gap-1">
-                                        <label class="text-xs font-medium text-muted-foreground">Barang <span class="text-destructive">*</span></label>
-                                        <select v-model="line.item_id" required class="rounded-md border bg-background px-3 py-2 text-sm" @change="onItemChange(line)">
+                                    <div class="grid gap-1.5">
+                                        <label class="text-xs font-semibold text-foreground">Pilih Barang <span class="text-destructive">*</span></label>
+                                        <select v-model="line.item_id" required class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden" @change="onItemChange(line)">
                                             <option value="">Pilih barang...</option>
                                             <option v-for="opt in items" :key="opt.id" :value="opt.id">
                                                 {{ opt.name }} ({{ opt.type_label }})
@@ -363,37 +391,37 @@ function lineError(index: number, key: 'item_id' | 'quantity' | 'serials'): stri
                                         <p v-if="lineError(idx, 'item_id')" class="text-xs text-destructive">{{ lineError(idx, 'item_id') }}</p>
                                     </div>
                                     <div class="grid grid-cols-2 gap-3">
-                                        <div class="grid gap-1">
-                                            <label class="text-xs font-medium text-muted-foreground">Jenis</label>
+                                        <div class="grid gap-1.5">
+                                            <label class="text-xs font-semibold text-muted-foreground">Jenis Item</label>
                                             <input
                                                 :value="line.item_id ? (itemFor(line.item_id)?.type_label ?? '-') : '-'"
                                                 type="text"
                                                 readonly
-                                                class="rounded-md border bg-muted/40 px-3 py-2 text-sm"
+                                                class="rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-foreground"
                                             />
                                         </div>
-                                        <div class="grid gap-1">
-                                            <label class="text-xs font-medium text-muted-foreground">Qty <span class="text-destructive">*</span></label>
-                                            <input v-model.number="line.quantity" type="number" min="1" required class="rounded-md border bg-background px-3 py-2 text-sm" />
+                                        <div class="grid gap-1.5">
+                                            <label class="text-xs font-semibold text-foreground">Jumlah (Qty) <span class="text-destructive">*</span></label>
+                                            <input v-model.number="line.quantity" type="number" min="1" required class="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden" />
                                             <p v-if="lineError(idx, 'quantity')" class="text-xs text-destructive">{{ lineError(idx, 'quantity') }}</p>
                                         </div>
                                     </div>
-                                    <div v-if="itemFor(line.item_id)?.type === 'serial'" class="grid gap-1">
-                                        <label class="text-xs font-medium text-muted-foreground">Daftar Serial Number</label>
-                                        <textarea v-model="line.serials" rows="2" placeholder="Satu SN per baris atau pisahkan koma" class="rounded-md border bg-background px-3 py-2 text-sm"></textarea>
-                                        <p class="text-[11px] text-muted-foreground">Wajib untuk barang berserial. Jumlah SN harus sesuai Qty.</p>
+                                    <div v-if="itemFor(line.item_id)?.type === 'serial'" class="grid gap-1.5">
+                                        <label class="text-xs font-semibold text-foreground">Daftar Serial Number</label>
+                                        <textarea v-model="line.serials" rows="2" placeholder="Masukkan 1 SN per baris atau pisahkan dengan koma" class="rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs text-foreground transition-colors focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden"></textarea>
+                                        <p class="text-[11px] text-muted-foreground">Jumlah serial number harus persis sama dengan Qty.</p>
                                         <p v-if="lineError(idx, 'serials')" class="text-xs text-destructive">{{ lineError(idx, 'serials') }}</p>
                                     </div>
-                                    <div v-else-if="line.item_id" class="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-                                        Barang non-serial: cukup isi Qty tanpa serial number.
+                                    <div v-else-if="line.item_id" class="rounded-xl border border-dashed border-border bg-muted/30 p-2.5 text-xs text-muted-foreground">
+                                        Barang non-serial: stok bertambah sesuai Qty tanpa tracking individual serial.
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-4 flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                        <button type="button" class="inline-flex items-center justify-center rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" @click="closeForm">Batal</button>
-                        <button type="submit" :disabled="form.processing" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50">
+                    <div class="mt-6 flex flex-col-reverse gap-2 border-t border-border/70 pt-4 sm:flex-row sm:justify-end">
+                        <button type="button" class="inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors" @click="closeForm">Batal</button>
+                        <button type="submit" :disabled="form.processing" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2 text-xs font-semibold text-white shadow-sm shadow-emerald-600/25 transition-all hover:brightness-105 disabled:opacity-50">
                             <Plus class="size-4" /> {{ form.processing ? 'Menyimpan...' : (editingId ? 'Simpan Perubahan' : 'Simpan Barang Masuk') }}
                         </button>
                     </div>

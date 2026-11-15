@@ -102,19 +102,24 @@ function destroy(row: BtsRow) {
 <template>
     <Head title="Data BTS/BSC" />
 
-    <div class="flex flex-1 flex-col gap-4 p-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-1 flex-col gap-5 p-4 md:p-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight">Data BTS/BSC</h1>
-                <p class="text-sm text-muted-foreground">Kelola data BTS/BSC: identitas, alamat, dan status operasional.</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-bold tracking-tight text-foreground">Data BTS / BSC</h1>
+                    <span class="rounded-full bg-[#fb4f00]/10 px-2.5 py-0.5 text-xs font-semibold text-[#fb4f00]">
+                        {{ btsList.length }} Site
+                    </span>
+                </div>
+                <p class="mt-0.5 text-xs text-muted-foreground">Kelola data BTS/BSC: identitas, alamat, dan status operasional jaringan BLiP.</p>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="rounded-md border bg-card px-2.5 py-1.5 text-xs text-muted-foreground">
-                    Akses: <span class="font-medium text-foreground">{{ roleLabel }}</span>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <span class="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-2xs">
+                    Peran: <span class="font-semibold text-foreground">{{ roleLabel }}</span>
                 </span>
                 <button
                     type="button"
-                    class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#fb4f00] to-[#ff6b26] px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-[#fb4f00]/25 transition-all hover:brightness-105 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
                     :disabled="!canManage"
                     @click="openAdd"
                 >
@@ -123,76 +128,84 @@ function destroy(row: BtsRow) {
             </div>
         </div>
 
-        <div v-if="!canManage" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+        <div v-if="!canManage" class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-300">
             Peran Teknisi hanya dapat melihat data BTS/BSC (tanpa tambah, edit, atau hapus).
         </div>
 
-        <div class="rounded-xl border bg-card shadow-sm">
-            <div class="flex flex-col gap-2 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="rounded-lg bg-primary/10 p-2 text-primary">
+        <div class="rounded-2xl border border-border/80 bg-card shadow-2xs">
+            <div class="flex flex-col gap-3 border-b border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="rounded-xl bg-[#fb4f00]/10 p-2 text-[#fb4f00]">
                         <RadioTower class="size-4" />
                     </div>
-                    <h2 class="font-medium">Daftar BTS/BSC</h2>
+                    <div>
+                        <h2 class="font-semibold text-foreground text-sm">Daftar Titik BTS/BSC</h2>
+                        <p class="text-xs text-muted-foreground">Distribusi node transmisi radio & optik</p>
+                    </div>
                 </div>
-                <div class="relative w-full sm:w-64">
-                    <Search class="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+                <div class="relative w-full sm:w-72">
+                    <Search class="pointer-events-none absolute left-3 top-2 size-3.5 text-muted-foreground" />
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Cari ID / nama / alamat..."
-                        class="w-full rounded-md border bg-background py-2 pl-8 pr-3 text-sm"
+                        placeholder="Cari ID, nama site, alamat..."
+                        class="w-full rounded-xl border border-border bg-background py-1.5 pl-8.5 pr-8 text-xs transition-colors hover:border-[#fb4f00]/40 focus:border-[#fb4f00] focus:ring-1 focus:ring-[#fb4f00]/40 outline-hidden"
                     />
+                    <button v-if="search" class="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground" @click="search = ''">
+                        <X class="size-3.5" />
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-muted/50 text-left text-xs text-muted-foreground">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         <tr>
-                            <th class="px-4 py-2 font-medium">ID</th>
-                            <th class="px-4 py-2 font-medium">Nama BTS/BSC</th>
-                            <th class="px-4 py-2 font-medium">Alamat</th>
-                            <th class="px-4 py-2 font-medium">Status</th>
-                            <th class="px-4 py-2 font-medium text-right">Aksi</th>
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Nama Site BTS/BSC</th>
+                            <th class="px-4 py-3">Alamat Lokasi</th>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
-                        <tr v-for="r in filtered" :key="r.id" class="hover:bg-muted/30">
-                            <td class="px-4 py-2 font-mono text-xs whitespace-nowrap">{{ r.id }}</td>
-                            <td class="px-4 py-2 min-w-[160px] font-medium">{{ r.nama }}</td>
-                            <td class="px-4 py-2 min-w-[260px]">{{ r.alamat }}</td>
-                            <td class="px-4 py-2">
+                    <tbody class="divide-y divide-border/50 text-xs">
+                        <tr v-for="r in filtered" :key="r.id" class="transition-colors hover:bg-[#fb4f00]/[0.02] dark:hover:bg-[#fb4f00]/[0.05]">
+                            <td class="px-4 py-3 font-mono font-medium text-muted-foreground whitespace-nowrap">{{ r.id }}</td>
+                            <td class="px-4 py-3 min-w-[180px] font-bold text-foreground">{{ r.nama }}</td>
+                            <td class="px-4 py-3 min-w-[260px] text-muted-foreground">{{ r.alamat }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 <span
-                                    class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
-                                    :class="r.status === 'Aktif' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300'"
+                                    class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold"
+                                    :class="r.status === 'Aktif' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/15 text-slate-600 dark:text-slate-400'"
                                 >
                                     {{ r.status }}
                                 </span>
                             </td>
-                            <td class="px-4 py-2 text-right whitespace-nowrap">
-                                <button
-                                    class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs hover:bg-muted disabled:opacity-40"
-                                    :disabled="!canManage"
-                                    @click="openEdit(r)"
-                                >
-                                    <Pencil class="size-3.5" /> Edit
-                                </button>
-                                <button
-                                    class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-40"
-                                    :disabled="!canManage"
-                                    @click="destroy(r)"
-                                >
-                                    <Trash2 class="size-3.5" /> Hapus
-                                </button>
+                            <td class="px-4 py-3 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1">
+                                    <button
+                                        class="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium hover:border-[#fb4f00]/40 hover:text-[#fb4f00] transition-colors disabled:opacity-40"
+                                        :disabled="!canManage"
+                                        @click="openEdit(r)"
+                                    >
+                                        <Pencil class="size-3" /> Edit
+                                    </button>
+                                    <button
+                                        class="inline-flex items-center gap-1 rounded-lg border border-destructive/20 bg-background px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
+                                        :disabled="!canManage"
+                                        @click="destroy(r)"
+                                    >
+                                        <Trash2 class="size-3" /> Hapus
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="!filtered.length">
-                            <td colspan="5" class="px-4 py-6 text-center text-muted-foreground">Tidak ada data BTS/BSC.</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-muted-foreground">Tidak ada data BTS/BSC yang sesuai.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="border-t px-4 py-2 text-xs text-muted-foreground">
+            <div class="border-t border-border/70 px-4 py-2.5 text-xs text-muted-foreground">
                 Total {{ filtered.length }} data BTS/BSC.
             </div>
         </div>
