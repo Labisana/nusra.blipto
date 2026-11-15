@@ -7,6 +7,7 @@ import {
     FileBarChart2,
     LayoutGrid,
     RadioTower,
+    UserCog,
     Users,
 } from '@lucide/vue';
 import { computed } from 'vue';
@@ -27,7 +28,7 @@ import { useRole } from '@/composables/useRole';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const { role } = useRole();
+const { canViewReports, canManageUsers } = useRole();
 
 const mainNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
@@ -53,7 +54,7 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
-    if (role.value !== 'teknisi') {
+    if (canViewReports.value) {
         items.push({
             title: 'Laporan',
             href: '/laporan',
@@ -73,6 +74,14 @@ const mainNavItems = computed<NavItem[]>(() => {
             icon: RadioTower,
         },
     );
+
+    if (canManageUsers.value) {
+        items.push({
+            title: 'Pengguna',
+            href: '/pengguna',
+            icon: UserCog,
+        });
+    }
 
     return items;
 });

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Enums\Role;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -51,6 +52,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::loginView(fn (Request $request) => Inertia::render('auth/Login', [
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
             'status' => $request->session()->get('status'),
+            'demoAccounts' => $this->demoAccounts(),
         ]));
 
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/ResetPassword', [
@@ -74,6 +76,45 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/TwoFactorChallenge'));
 
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/ConfirmPassword'));
+    }
+
+    /**
+     * Akun demo untuk mencoba setiap peran. Tidak ditampilkan di produksi.
+     *
+     * @return array<int, array{role: string, role_label: string, description: string, name: string, email: string, password: string}>
+     */
+    private function demoAccounts(): array
+    {
+        if (app()->isProduction()) {
+            return [];
+        }
+
+        return [
+            [
+                'role' => Role::Spv->value,
+                'role_label' => Role::Spv->label(),
+                'description' => 'Akses penuh',
+                'name' => 'Supervisor Gudang',
+                'email' => 'spv@nusra.test',
+                'password' => 'password',
+            ],
+            [
+                'role' => Role::Admin->value,
+                'role_label' => Role::Admin->label(),
+                'description' => 'Kelola data & transaksi',
+                'name' => 'Admin Gudang',
+                'email' => 'admin@nusra.test',
+                'password' => 'password',
+            ],
+            [
+                'role' => Role::Teknisi->value,
+                'role_label' => Role::Teknisi->label(),
+                'description' => 'Input transaksi',
+                'name' => 'Teknisi Lapangan',
+                'email' => 'teknisi@nusra.test',
+                'password' => 'password',
+            ],
+        ];
     }
 
     /**

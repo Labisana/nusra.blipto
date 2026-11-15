@@ -8,7 +8,10 @@ import {
     TriangleAlert,
     Users,
 } from '@lucide/vue';
+import { computed } from 'vue';
+import { useRole } from '@/composables/useRole';
 import { dashboard } from '@/routes';
+import type { ReportRow } from '@/types/inventory';
 
 defineOptions({
     layout: {
@@ -21,30 +24,46 @@ defineOptions({
     },
 });
 
-const stats = [
-    { label: 'Barang Masuk (Bulan ini)', value: '128', icon: ArrowDownToLine, tone: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10' },
-    { label: 'Barang Keluar (Bulan ini)', value: '94', icon: ArrowUpFromLine, tone: 'text-amber-600 bg-amber-50 dark:bg-amber-500/10' },
-    { label: 'Total Item Stock', value: '342', icon: Boxes, tone: 'text-sky-600 bg-sky-50 dark:bg-sky-500/10' },
-    { label: 'Pelanggan Aktif', value: '57', icon: Users, tone: 'text-violet-600 bg-violet-50 dark:bg-violet-500/10' },
-];
+const props = defineProps<{
+    stats: {
+        incoming_this_month: number;
+        outgoing_this_month: number;
+        total_remaining: number;
+        active_customers: number;
+    };
+    recentIncoming: ReportRow[];
+    recentOutgoing: ReportRow[];
+    lowStock: { item: string; stock: number; min: number; type: string }[];
+}>();
 
-const recentIncoming = [
-    { date: '2026-04-10', item: 'Router Mikrotik RB750', type: 'Serial', qty: 5, ref: 'PO-2401', user: 'Admin' },
-    { date: '2026-04-10', item: 'Kabel UTP Cat6', type: 'Non-Serial', qty: 20, ref: 'PO-2402', user: 'Teknisi Budi' },
-    { date: '2026-04-09', item: 'ONU/ONT ZTE F609', type: 'Serial', qty: 12, ref: 'PO-2398', user: 'Admin' },
-];
+const { roleLabel } = useRole();
 
-const recentOutgoing = [
-    { date: '2026-04-10', item: 'Router Mikrotik RB750', type: 'Serial', qty: 2, ref: 'DO-1104', customer: 'PT Nusra Net - Cab. Mataram', user: 'Teknisi Andi' },
-    { date: '2026-04-09', item: 'Patch Cord 3m', type: 'Non-Serial', qty: 15, ref: 'DO-1103', customer: 'CV Sinar Lombok', user: 'Teknisi Budi' },
-    { date: '2026-04-09', item: 'ONU/ONT ZTE F609', type: 'Serial', qty: 4, ref: 'DO-1102', customer: 'PT Nusra Net - Cab. Praya', user: 'Admin' },
-];
-
-const lowStock = [
-    { item: 'SFP Module 1G', stock: 3, min: 10, type: 'Non-Serial' },
-    { item: 'Access Point Ubiquiti', stock: 2, min: 5, type: 'Serial' },
-    { item: 'Konektor RJ45', stock: 18, min: 50, type: 'Non-Serial' },
-];
+const stats = computed(() => [
+    {
+        label: 'Barang Masuk (Bulan ini)',
+        value: props.stats.incoming_this_month.toLocaleString('id-ID'),
+        icon: ArrowDownToLine,
+        tone: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+        label: 'Barang Keluar (Bulan ini)',
+        value: props.stats.outgoing_this_month.toLocaleString('id-ID'),
+        icon: ArrowUpFromLine,
+        tone: 'text-amber-600 bg-amber-50 dark:bg-amber-500/10',
+    },
+    {
+        label: 'Total Item Stock',
+        value: props.stats.total_remaining.toLocaleString('id-ID'),
+        icon: Boxes,
+        tone: 'text-sky-600 bg-sky-50 dark:bg-sky-500/10',
+    },
+    {
+        label: 'Pelanggan Aktif',
+        value: props.stats.active_customers.toLocaleString('id-ID'),
+        icon: Users,
+        tone: 'text-violet-600 bg-violet-50 dark:bg-violet-500/10',
+    },
+]);
 </script>
 
 <template>
@@ -60,7 +79,7 @@ const lowStock = [
             </div>
             <div class="inline-flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs text-muted-foreground">
                 <Package class="size-4" />
-                Mode tampilan: <span class="font-medium text-foreground">SPV (Full Akses)</span>
+                Mode akses: <span class="font-medium text-foreground">{{ roleLabel }}</span>
             </div>
         </div>
 
@@ -86,7 +105,7 @@ const lowStock = [
             <div class="rounded-xl border bg-card shadow-sm xl:col-span-2">
                 <div class="flex items-center justify-between border-b px-4 py-3">
                     <h2 class="font-medium">Barang Masuk Terbaru</h2>
-                    <span class="text-xs text-muted-foreground">3 transaksi terakhir</span>
+                    <span class="text-xs text-muted-foreground">{{ recentIncoming.length }} baris terakhir</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
@@ -101,7 +120,7 @@ const lowStock = [
                             </tr>
                         </thead>
                         <tbody class="divide-y">
-                            <tr v-for="r in recentIncoming" :key="r.ref" class="hover:bg-muted/30">
+                            <tr v-for="r in recentIncoming" :key="r.id" class="hover:bg-muted/30">
                                 <td class="px-4 py-2 whitespace-nowrap">{{ r.date }}</td>
                                 <td class="px-4 py-2 min-w-[180px]">{{ r.item }}</td>
                                 <td class="px-4 py-2">
@@ -110,6 +129,9 @@ const lowStock = [
                                 <td class="px-4 py-2 font-medium text-emerald-600">+{{ r.qty }}</td>
                                 <td class="px-4 py-2 whitespace-nowrap">{{ r.ref }}</td>
                                 <td class="px-4 py-2 whitespace-nowrap">{{ r.user }}</td>
+                            </tr>
+                            <tr v-if="!recentIncoming.length">
+                                <td colspan="6" class="px-4 py-6 text-center text-muted-foreground">Belum ada transaksi barang masuk.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -132,6 +154,9 @@ const lowStock = [
                                 {{ l.stock }}
                             </span>
                         </div>
+                    </li>
+                    <li v-if="!lowStock.length" class="px-4 py-6 text-center text-sm text-muted-foreground">
+                        Semua stok di atas batas minimum.
                     </li>
                 </ul>
             </div>
@@ -156,7 +181,7 @@ const lowStock = [
                         </tr>
                     </thead>
                     <tbody class="divide-y">
-                        <tr v-for="r in recentOutgoing" :key="r.ref" class="hover:bg-muted/30">
+                        <tr v-for="r in recentOutgoing" :key="r.id" class="hover:bg-muted/30">
                             <td class="px-4 py-2 whitespace-nowrap">{{ r.date }}</td>
                             <td class="px-4 py-2 min-w-[180px]">{{ r.item }}</td>
                             <td class="px-4 py-2">
@@ -166,6 +191,9 @@ const lowStock = [
                             <td class="px-4 py-2 whitespace-nowrap">{{ r.ref }}</td>
                             <td class="px-4 py-2 min-w-[220px]">{{ r.customer }}</td>
                             <td class="px-4 py-2 whitespace-nowrap">{{ r.user }}</td>
+                        </tr>
+                        <tr v-if="!recentOutgoing.length">
+                            <td colspan="7" class="px-4 py-6 text-center text-muted-foreground">Belum ada transaksi barang keluar.</td>
                         </tr>
                     </tbody>
                 </table>

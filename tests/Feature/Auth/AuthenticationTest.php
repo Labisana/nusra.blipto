@@ -10,6 +10,20 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
+test('demo accounts are listed by role on the login page', function () {
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('auth/Login')
+            ->has('demoAccounts', 3)
+            ->where('demoAccounts.0.role', 'spv')
+            ->where('demoAccounts.0.email', 'spv@nusra.test')
+            ->where('demoAccounts.1.role', 'admin')
+            ->where('demoAccounts.1.email', 'admin@nusra.test')
+            ->where('demoAccounts.2.role', 'teknisi')
+            ->where('demoAccounts.2.email', 'teknisi@nusra.test'));
+});
+
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 

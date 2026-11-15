@@ -4,6 +4,10 @@ export type User = {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    role?: 'spv' | 'admin' | 'teknisi';
+    can_manage?: boolean;
+    can_view_reports?: boolean;
+    can_manage_users?: boolean;
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
