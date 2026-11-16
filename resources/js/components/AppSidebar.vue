@@ -9,6 +9,7 @@ import {
     RadioTower,
     UserCog,
     Users,
+    Warehouse,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
@@ -37,6 +38,9 @@ const mainNavItems = computed<NavItem[]>(() => {
             href: dashboard(),
             icon: LayoutGrid,
         },
+    ];
+
+    const gudangSubItems: NavItem[] = [
         {
             title: 'Barang Masuk',
             href: '/barang-masuk',
@@ -55,12 +59,19 @@ const mainNavItems = computed<NavItem[]>(() => {
     ];
 
     if (canViewReports.value) {
-        items.push({
+        gudangSubItems.push({
             title: 'Laporan',
             href: '/laporan',
             icon: FileBarChart2,
         });
     }
+
+    items.push({
+        title: 'Gudang',
+        href: '/stok',
+        icon: Warehouse,
+        items: gudangSubItems,
+    });
 
     items.push(
         {

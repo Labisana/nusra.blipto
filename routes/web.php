@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('inventory.outgoing.destroy');
 
     // Stock / master barang
+    Route::get('gudang', fn () => redirect()->route('inventory.stock'))->name('inventory.gudang');
     Route::get('stok', [ItemController::class, 'index'])->name('inventory.stock');
     Route::post('stok', [ItemController::class, 'store'])->name('inventory.stock.store');
     Route::put('stok/{item}', [ItemController::class, 'update'])->name('inventory.stock.update');
