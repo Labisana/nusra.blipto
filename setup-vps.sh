@@ -1,29 +1,63 @@
 #!/bin/bash
 set -e
 
-# ==========================================
+# ==========================================================
 # Laravel Production Setup Script for VPS
-# Nginx + PHP 8.4 + MySQL + Node.js 22
-# ==========================================
+# Supports Ubuntu 20.04/22.04/24.04 & Debian 11/12
+# Nginx + PHP 8.4 + MySQL/MariaDB + Node.js 22 + Composer 2
+# ==========================================================
 
 export DEBIAN_FRONTEND=noninteractive
 
 echo "=========================================="
-echo " 1. Memperbarui Sistem & Paket Dasar"
+echo " 1. Mendeteksi Sistem Operasi"
 echo "=========================================="
-sudo apt-get update -y
-sudo apt-get install -y curl git unzip zip software-properties-common ca-certificates ufw lsb-release
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+    CODENAME=$VERSION_CODENAME
+fi
+
+echo "OS terdeteksi: $OS ($CODENAME)"
 
 echo "=========================================="
-echo " 2. Memasang Nginx & MySQL Server"
+echo " 2. Memperbarui Paket Dasar & Sertifikat"
 echo "=========================================="
-sudo apt-get install -y nginx mysql-server
+sudo apt-get update -y
+sudo apt-get install -y curl git unzip zip software-properties-common ca-certificates apt-transport-https gnupg lsb-release ufw
 
 echo "=========================================="
-echo " 3. Memasang PHP 8.4 & Ekstensi Laravel"
+echo " 3. Memasang Repository PHP 8.4"
 echo "=========================================="
-sudo add-apt-repository -y ppa:ondrej/php
-sudo apt-get update -y
+if [ "$OS" = "debian" ]; then
+    echo "Menambahkan Sury PHP repo untuk Debian ($CODENAME)..."
+    curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+    sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb || true
+    echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/php.list
+    sudo apt-get update -y
+elif [ "$OS" = "ubuntu" ]; then
+    echo "Menambahkan PPA ondrej/php untuk Ubuntu..."
+    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+    sudo apt-get update -y
+else
+    echo "Distro lain, mencoba PPA & Debian fallback..."
+    sudo add-apt-repository -y ppa:ondrej/php || {
+        curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+        sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb || true
+        echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/php.list
+    }
+    sudo apt-get update -y
+fi
+
+echo "=========================================="
+echo " 4. Memasang Nginx & Database Server"
+echo "=========================================="
+sudo apt-get install -y nginx
+sudo apt-get install -y default-mysql-server || sudo apt-get install -y mysql-server || sudo apt-get install -y mariadb-server
+
+echo "=========================================="
+echo " 5. Memasang PHP 8.4 & Ekstensi Laravel"
+echo "=========================================="
 sudo apt-get install -y \
     php8.4-fpm \
     php8.4-cli \
@@ -39,7 +73,7 @@ sudo apt-get install -y \
     php8.4-sqlite3
 
 echo "=========================================="
-echo " 4. Memasang Composer 2"
+echo " 6. Memasang Composer 2"
 echo "=========================================="
 if ! command -v composer &> /dev/null; then
     curl -sS https://getcomposer.org/installer | php
@@ -48,7 +82,7 @@ if ! command -v composer &> /dev/null; then
 fi
 
 echo "=========================================="
-echo " 5. Memasang Node.js 22 LTS"
+echo " 7. Memasang Node.js 22 LTS"
 echo "=========================================="
 if ! command -v node &> /dev/null; then
     curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
@@ -56,23 +90,23 @@ if ! command -v node &> /dev/null; then
 fi
 
 echo "=========================================="
-echo " 6. Menyiapkan Database MySQL"
+echo " 8. Menyiapkan Database"
 echo "=========================================="
-sudo systemctl start mysql
-sudo systemctl enable mysql
+sudo systemctl start mariadb 2>/dev/null || sudo systemctl start mysql 2>/dev/null || true
+sudo systemctl enable mariadb 2>/dev/null || sudo systemctl enable mysql 2>/dev/null || true
 
 DB_NAME="nusra_db"
 DB_USER="nusra_user"
 DB_PASS="BlipTo_SecurePass2026!"
 
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_PASS}';" || sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
+sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
 sudo mysql -e "ALTER USER '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
 sudo mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
 echo "=========================================="
-echo " 7. Clone Repository Proyek"
+echo " 9. Clone Repository Proyek"
 echo "=========================================="
 WEB_DIR="/var/www/nusra.blipto"
 sudo mkdir -p /var/www
@@ -89,7 +123,7 @@ fi
 cd "$WEB_DIR"
 
 echo "=========================================="
-echo " 8. Konfigurasi Environment (.env)"
+echo " 10. Konfigurasi Environment (.env)"
 echo "=========================================="
 if [ ! -f "$WEB_DIR/.env" ]; then
     sudo cp "$WEB_DIR/.env.example" "$WEB_DIR/.env"
@@ -112,13 +146,12 @@ sudo sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${DB_PASS}/" "$WEB_DIR/.env"
 sudo sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=file/' "$WEB_DIR/.env"
 sudo sed -i 's/CACHE_STORE=.*/CACHE_STORE=file/' "$WEB_DIR/.env"
 
-# Pastikan APP_KEY terisi
 if ! grep -q "^APP_KEY=base64:" "$WEB_DIR/.env"; then
     sudo sed -i 's/APP_KEY=.*/APP_KEY=base64:Ea4pJDGCdMo\/yqnIB2\/FYW2YlLjfWNpdItxe9D3uiug=/' "$WEB_DIR/.env"
 fi
 
 echo "=========================================="
-echo " 9. Menginstal Dependensi PHP & Frontend"
+echo " 11. Menginstal Dependensi PHP & Frontend"
 echo "=========================================="
 export COMPOSER_ALLOW_SUPERUSER=1
 sudo -E composer install --no-dev --optimize-autoloader --no-interaction
@@ -126,13 +159,13 @@ sudo npm install
 sudo npm run build
 
 echo "=========================================="
-echo " 10. Menjalankan Migrasi Database"
+echo " 12. Menjalankan Migrasi Database"
 echo "=========================================="
 sudo php artisan storage:link || true
 sudo php artisan migrate --force --seed || sudo php artisan migrate --force
 
 echo "=========================================="
-echo " 11. Mengatur Izin Folder (Permissions)"
+echo " 13. Mengatur Izin Folder (Permissions)"
 echo "=========================================="
 sudo chown -R www-data:www-data "$WEB_DIR"
 sudo find "$WEB_DIR" -type f -exec chmod 644 {} \;
@@ -140,7 +173,7 @@ sudo find "$WEB_DIR" -type d -exec chmod 755 {} \;
 sudo chmod -R 775 "$WEB_DIR/storage" "$WEB_DIR/bootstrap/cache"
 
 echo "=========================================="
-echo " 12. Konfigurasi Nginx Server Block"
+echo " 14. Konfigurasi Nginx Server Block"
 echo "=========================================="
 NGINX_CONF="/etc/nginx/sites-available/nusra.blipto"
 
@@ -182,7 +215,6 @@ server {
 }
 EOF
 
-# Hapus default nginx jika ada dan aktifkan konfigurasi baru
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/
 
@@ -192,9 +224,8 @@ sudo systemctl restart nginx
 sudo systemctl enable nginx
 sudo systemctl enable php8.4-fpm
 
-# Buka firewall port 80 dan 443
-sudo ufw allow 'Nginx Full' || true
-sudo ufw allow 22/tcp || true
+sudo ufw allow 'Nginx Full' 2>/dev/null || true
+sudo ufw allow 22/tcp 2>/dev/null || true
 
 echo ""
 echo "=========================================================="
