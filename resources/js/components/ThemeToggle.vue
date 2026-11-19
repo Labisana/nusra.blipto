@@ -13,8 +13,12 @@ onMounted(() => {
     mounted.value = true;
 });
 
-const isDark = computed(() => mounted.value && resolvedAppearance.value === 'dark');
-const isLight = computed(() => mounted.value && resolvedAppearance.value !== 'dark');
+const isDark = computed(
+    () => mounted.value && resolvedAppearance.value === 'dark',
+);
+const isLight = computed(
+    () => mounted.value && resolvedAppearance.value !== 'dark',
+);
 
 const activeClasses =
     'bg-background text-foreground shadow-xs dark:bg-neutral-700 dark:text-white';

@@ -20,7 +20,9 @@ defineProps<{
         class="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-6 md:p-10"
     >
         <!-- Ambient Glow -->
-        <div class="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[500px] w-[600px] -translate-x-1/2 rounded-full bg-gradient-to-b from-[#fb4f00]/15 via-[#fb4f00]/5 to-transparent blur-3xl dark:from-[#fb4f00]/20"></div>
+        <div
+            class="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[500px] w-[600px] -translate-x-1/2 rounded-full bg-gradient-to-b from-[#fb4f00]/15 via-[#fb4f00]/5 to-transparent blur-3xl dark:from-[#fb4f00]/20"
+        ></div>
 
         <div class="flex w-full max-w-md flex-col gap-6">
             <Link
@@ -42,11 +44,20 @@ defineProps<{
             </Link>
 
             <div class="flex flex-col gap-6">
-                <Card class="relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-xl shadow-black/5 backdrop-blur-xl">
-                    <div class="absolute inset-x-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-transparent via-[#fb4f00] to-transparent"></div>
+                <Card
+                    class="relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-xl shadow-black/5 backdrop-blur-xl"
+                >
+                    <div
+                        class="absolute inset-x-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-transparent via-[#fb4f00] to-transparent"
+                    ></div>
                     <CardHeader class="px-8 pt-8 pb-0 text-center">
-                        <CardTitle class="text-xl font-bold tracking-tight text-foreground">{{ title }}</CardTitle>
-                        <CardDescription class="text-xs text-muted-foreground mt-1">
+                        <CardTitle
+                            class="text-xl font-bold tracking-tight text-foreground"
+                            >{{ title }}</CardTitle
+                        >
+                        <CardDescription
+                            class="mt-1 text-xs text-muted-foreground"
+                        >
                             {{ description }}
                         </CardDescription>
                     </CardHeader>
@@ -57,7 +68,8 @@ defineProps<{
             </div>
 
             <p class="text-center text-xs text-muted-foreground">
-                &copy; {{ new Date().getFullYear() }} BLiP Nusra · PT Bali Lintas Prestasi
+                &copy; {{ new Date().getFullYear() }} BLiP Nusra · PT Bali
+                Lintas Prestasi
             </p>
         </div>
     </div>

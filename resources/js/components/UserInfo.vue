@@ -39,24 +39,39 @@ const roleBadgeColor = computed(() => {
 
 <template>
     <div class="relative">
-        <Avatar class="size-8 overflow-hidden rounded-lg ring-1.5 ring-[#fb4f00]/30 transition-transform group-hover:scale-105">
-            <AvatarImage v-if="showAvatar" :src="user!.avatar!" :alt="displayName" />
-            <AvatarFallback class="rounded-lg bg-gradient-to-br from-[#fb4f00]/15 to-[#fb4f00]/5 font-bold text-[#fb4f00]">
+        <Avatar
+            class="ring-1.5 size-8 overflow-hidden rounded-lg ring-[#fb4f00]/30 transition-transform group-hover:scale-105"
+        >
+            <AvatarImage
+                v-if="showAvatar"
+                :src="user!.avatar!"
+                :alt="displayName"
+            />
+            <AvatarFallback
+                class="rounded-lg bg-gradient-to-br from-[#fb4f00]/15 to-[#fb4f00]/5 font-bold text-[#fb4f00]"
+            >
                 {{ getInitials(displayName) }}
             </AvatarFallback>
         </Avatar>
-        <span class="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-background"></span>
+        <span
+            class="absolute -right-0.5 -bottom-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-background"
+        ></span>
     </div>
 
     <div class="grid flex-1 text-left text-sm leading-tight">
         <div class="flex items-center gap-1.5">
             <span class="truncate font-semibold">{{ displayName }}</span>
-            <span class="rounded border px-1 py-0.2 text-[9px] font-bold uppercase tracking-wider" :class="roleBadgeColor">
+            <span
+                class="py-0.2 rounded border px-1 text-[9px] font-bold tracking-wider uppercase"
+                :class="roleBadgeColor"
+            >
                 {{ role }}
             </span>
         </div>
-        <span v-if="showEmail && displayEmail" class="truncate text-xs text-muted-foreground">{{
-            displayEmail
-        }}</span>
+        <span
+            v-if="showEmail && displayEmail"
+            class="truncate text-xs text-muted-foreground"
+            >{{ displayEmail }}</span
+        >
     </div>
 </template>

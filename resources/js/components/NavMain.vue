@@ -66,7 +66,9 @@ watch(
                                 class="cursor-pointer"
                             >
                                 <component :is="item.icon" v-if="item.icon" />
-                                <span class="font-medium">{{ item.title }}</span>
+                                <span class="font-medium">{{
+                                    item.title
+                                }}</span>
                                 <ChevronRight
                                     class="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                 />

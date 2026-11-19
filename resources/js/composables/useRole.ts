@@ -30,9 +30,15 @@ export function useRole() {
     const roleLabel = computed(() => roleLabels[role.value]);
     const isTeknisi = computed(() => role.value === 'teknisi');
     const isSpv = computed(() => role.value === 'spv');
-    const canManage = computed(() => user.value?.can_manage ?? role.value !== 'teknisi');
-    const canViewReports = computed(() => user.value?.can_view_reports ?? role.value !== 'teknisi');
-    const canManageUsers = computed(() => user.value?.can_manage_users ?? role.value === 'spv');
+    const canManage = computed(
+        () => user.value?.can_manage ?? role.value !== 'teknisi',
+    );
+    const canViewReports = computed(
+        () => user.value?.can_view_reports ?? role.value !== 'teknisi',
+    );
+    const canManageUsers = computed(
+        () => user.value?.can_manage_users ?? role.value === 'spv',
+    );
 
     return {
         role,
