@@ -58,6 +58,7 @@ const stats = computed(() => [
         icon: ArrowDownToLine,
         color: 'emerald',
         badge: 'Inflow',
+        href: '/barang-masuk',
         tone: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
         gradient: 'from-emerald-500/10 to-transparent',
     },
@@ -67,6 +68,7 @@ const stats = computed(() => [
         icon: ArrowUpFromLine,
         color: 'orange',
         badge: 'Outflow',
+        href: '/barang-keluar',
         tone: 'text-[#fb4f00] bg-[#fb4f00]/10 border-[#fb4f00]/20',
         gradient: 'from-[#fb4f00]/10 to-transparent',
     },
@@ -76,6 +78,7 @@ const stats = computed(() => [
         icon: Boxes,
         color: 'blue',
         badge: 'Gudang',
+        href: '/stok',
         tone: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
         gradient: 'from-sky-500/10 to-transparent',
     },
@@ -85,6 +88,7 @@ const stats = computed(() => [
         icon: Users,
         color: 'violet',
         badge: 'Relasi',
+        href: '/pelanggan',
         tone: 'text-purple-500 bg-purple-500/10 border-purple-500/20',
         gradient: 'from-purple-500/10 to-transparent',
     },
@@ -172,10 +176,11 @@ const stats = computed(() => [
 
         <!-- Metric Stat Cards -->
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div
+            <Link
                 v-for="s in stats"
                 :key="s.label"
-                class="group relative overflow-hidden rounded-2xl border border-border/80 bg-card p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-[#fb4f00]/30 hover:shadow-md"
+                :href="s.href"
+                class="group relative block overflow-hidden rounded-2xl border border-border/80 bg-card p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-[#fb4f00]/30 hover:shadow-md active:scale-95"
             >
                 <div
                     :class="[
@@ -213,11 +218,11 @@ const stats = computed(() => [
                         s.badge
                     }}</span>
                     <span
-                        class="text-xs font-medium text-[#fb4f00] opacity-0 transition-opacity group-hover:opacity-100"
-                        >&rarr; Detail</span
+                        class="text-xs font-medium text-[#fb4f00] opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+                        >&rarr; Buka Halaman</span
                     >
                 </div>
-            </div>
+            </Link>
         </div>
 
         <!-- Main Content Grid: Transactions & Alerts -->
@@ -254,7 +259,8 @@ const stats = computed(() => [
                         />
                     </Link>
                 </div>
-                <div class="overflow-x-auto">
+                <!-- Desktop Table View -->
+                <div class="hidden overflow-x-auto md:block">
                     <table class="w-full text-left text-sm">
                         <thead
                             class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
@@ -322,6 +328,43 @@ const stats = computed(() => [
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="block divide-y divide-border/60 md:hidden">
+                    <div
+                        v-for="r in recentIncoming"
+                        :key="r.id"
+                        class="space-y-2 p-4 transition-colors active:bg-muted/30"
+                    >
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <p class="text-xs font-bold text-foreground">
+                                    {{ r.item }}
+                                </p>
+                                <p class="text-[11px] text-muted-foreground">
+                                    {{ r.date }} · Ref: {{ r.ref }}
+                                </p>
+                            </div>
+                            <span
+                                class="inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                            >
+                                +{{ r.qty }}
+                            </span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between text-[11px] text-muted-foreground"
+                        >
+                            <span>Tipe: {{ r.type }}</span>
+                            <span>Petugas: {{ r.user }}</span>
+                        </div>
+                    </div>
+                    <div
+                        v-if="!recentIncoming.length"
+                        class="p-6 text-center text-xs text-muted-foreground"
+                    >
+                        Belum ada transaksi barang masuk.
+                    </div>
                 </div>
             </div>
 
@@ -446,7 +489,8 @@ const stats = computed(() => [
                     />
                 </Link>
             </div>
-            <div class="overflow-x-auto">
+            <!-- Desktop Table View -->
+            <div class="hidden overflow-x-auto md:block">
                 <table class="w-full text-left text-sm">
                     <thead
                         class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
@@ -520,6 +564,45 @@ const stats = computed(() => [
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="block divide-y divide-border/60 md:hidden">
+                <div
+                    v-for="r in recentOutgoing"
+                    :key="r.id"
+                    class="space-y-2 p-4 transition-colors active:bg-muted/30"
+                >
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <p class="text-xs font-bold text-foreground">
+                                {{ r.item }}
+                            </p>
+                            <p class="text-[11px] text-muted-foreground">
+                                {{ r.date }} · Ref: {{ r.ref }}
+                            </p>
+                        </div>
+                        <span
+                            class="inline-flex rounded-full bg-[#fb4f00]/15 px-2 py-0.5 text-xs font-bold text-[#fb4f00]"
+                        >
+                            -{{ r.qty }}
+                        </span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground"
+                    >
+                        <span class="font-medium text-foreground"
+                            >🎯 {{ r.customer }}</span
+                        >
+                        <span>Petugas: {{ r.user }}</span>
+                    </div>
+                </div>
+                <div
+                    v-if="!recentOutgoing.length"
+                    class="p-6 text-center text-xs text-muted-foreground"
+                >
+                    Belum ada transaksi barang keluar.
+                </div>
             </div>
         </div>
     </div>

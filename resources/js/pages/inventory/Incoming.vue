@@ -275,7 +275,8 @@ function lineError(
                     </button>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <!-- Desktop Table View -->
+            <div class="hidden overflow-x-auto md:block">
                 <table class="w-full text-left text-sm">
                     <thead
                         class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
@@ -386,6 +387,91 @@ function lineError(
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Transaction Cards View -->
+            <div class="block divide-y divide-border/60 md:hidden">
+                <div
+                    v-for="r in filteredRows"
+                    :key="r.id"
+                    class="space-y-2.5 p-4 transition-colors active:bg-muted/30"
+                >
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span
+                                    class="font-mono text-xs font-bold text-foreground"
+                                    >{{ r.ref }}</span
+                                >
+                                <span
+                                    class="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-semibold"
+                                >
+                                    {{ r.activity }}
+                                </span>
+                            </div>
+                            <p class="mt-0.5 text-[11px] text-muted-foreground">
+                                {{ r.date }} · Oleh: {{ r.user }}
+                            </p>
+                        </div>
+                        <span
+                            class="inline-flex shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400"
+                        >
+                            +{{ r.qty }}
+                        </span>
+                    </div>
+
+                    <div
+                        class="space-y-1 rounded-xl border border-border/50 bg-muted/40 p-3"
+                    >
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-foreground">{{
+                                r.item
+                            }}</span>
+                            <span class="text-[10px] text-muted-foreground">{{
+                                r.type
+                            }}</span>
+                        </div>
+                        <p
+                            v-if="r.customer && r.customer !== '-'"
+                            class="text-[11px] text-muted-foreground"
+                        >
+                            👤 Pelanggan:
+                            <span class="font-medium text-foreground">{{
+                                r.customer
+                            }}</span>
+                        </p>
+                        <p
+                            v-if="r.serials && r.serials !== '-'"
+                            class="font-mono text-[11px] break-all text-muted-foreground"
+                        >
+                            SN: {{ r.serials }}
+                        </p>
+                    </div>
+
+                    <div v-if="canManage" class="flex items-center gap-2 pt-1">
+                        <button
+                            type="button"
+                            class="inline-flex min-h-[42px] flex-1 items-center justify-center rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-all hover:border-[#fb4f00]/40 hover:text-[#fb4f00] active:scale-95"
+                            @click="openEditById(r.transaction_id)"
+                        >
+                            Edit Transaksi
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 text-destructive transition-all hover:bg-destructive/15 active:scale-95"
+                            @click="destroy(r.transaction_id)"
+                            aria-label="Hapus"
+                        >
+                            <Trash2 class="size-4" />
+                        </button>
+                    </div>
+                </div>
+                <div
+                    v-if="!filteredRows.length"
+                    class="p-8 text-center text-xs text-muted-foreground"
+                >
+                    Belum ada transaksi barang masuk yang sesuai.
+                </div>
             </div>
             <div
                 class="flex items-center justify-between border-t border-border/70 px-4 py-2.5 text-xs text-muted-foreground"
