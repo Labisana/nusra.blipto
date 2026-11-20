@@ -18,6 +18,9 @@ if [ -f /etc/os-release ]; then
     CODENAME=$VERSION_CODENAME
 fi
 
+OS="${OS:-ubuntu}"
+CODENAME="${CODENAME:-$(lsb_release -sc 2>/dev/null || echo 'jammy')}"
+
 echo "OS terdeteksi: $OS ($CODENAME)"
 
 echo "=========================================="
@@ -31,20 +34,23 @@ echo " 3. Memasang Repository PHP 8.4"
 echo "=========================================="
 if [ "$OS" = "debian" ]; then
     echo "Menambahkan Sury PHP repo untuk Debian ($CODENAME)..."
-    curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
-    sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb || true
-    echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/php.list
+    sudo curl -sSLo /etc/apt/trusted.gpg.d/sury-php.gpg https://packages.sury.org/php/apt.gpg
+    echo "deb https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/sury-php.list
     sudo apt-get update -y
 elif [ "$OS" = "ubuntu" ]; then
-    echo "Menambahkan PPA ondrej/php untuk Ubuntu..."
-    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+    echo "Menambahkan PPA ondrej/php untuk Ubuntu ($CODENAME)..."
+    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php || {
+        echo "Fallback: Menambahkan PPA via launchpadcontent.net..."
+        sudo mkdir -p /etc/apt/trusted.gpg.d
+        sudo curl -sSLo /etc/apt/trusted.gpg.d/ondrej-php.gpg 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c' || true
+        echo "deb [signed-by=/etc/apt/trusted.gpg.d/ondrej-php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/ondrej-php.list
+    }
     sudo apt-get update -y
 else
-    echo "Distro lain, mencoba PPA & Debian fallback..."
-    sudo add-apt-repository -y ppa:ondrej/php || {
-        curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
-        sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb || true
-        echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/php.list
+    echo "Distro turunan terdeteksi ($OS)..."
+    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php 2>/dev/null || {
+        sudo curl -sSLo /etc/apt/trusted.gpg.d/sury-php.gpg https://packages.sury.org/php/apt.gpg || true
+        echo "deb https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/sury-php.list
     }
     sudo apt-get update -y
 fi
