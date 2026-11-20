@@ -8,6 +8,7 @@ import {
     LayoutGrid,
     Plus,
     RadioTower,
+    ShieldCheck,
     Users,
     X,
 } from '@lucide/vue';
@@ -20,6 +21,9 @@ const { canViewReports, canManage } = useRole();
 const showQuickActions = ref(false);
 
 const currentUrl = computed(() => page.url);
+const pendingCount = computed<number>(
+    () => (page.props as any).pending_approvals_count ?? 0,
+);
 
 function isActive(path: string): boolean {
     if (path === '/dashboard') {
@@ -104,6 +108,12 @@ function closeQuickActions() {
                     aria-label="Aksi Cepat"
                 >
                     <Plus class="size-6 transition-transform duration-200" />
+                    <span
+                        v-if="canManage && pendingCount > 0"
+                        class="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-extrabold text-white shadow-xs ring-2 ring-background"
+                    >
+                        {{ pendingCount }}
+                    </span>
                     <span
                         class="absolute -inset-1 -z-10 animate-ping rounded-full bg-[#fb4f00]/20 opacity-75"
                         v-if="!showQuickActions"
@@ -202,6 +212,36 @@ function closeQuickActions() {
 
                 <!-- Grid of Quick Action Cards -->
                 <div class="grid grid-cols-2 gap-3">
+                    <!-- Persetujuan SPV Banner (Khusus SPV/Admin) -->
+                    <Link
+                        v-if="canManage"
+                        href="/persetujuan"
+                        class="group col-span-2 flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 transition-all hover:bg-amber-500/15 active:scale-95"
+                        @click="closeQuickActions"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex size-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                            >
+                                <ShieldCheck class="size-5" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-foreground">
+                                    Pusat Persetujuan SPV
+                                </p>
+                                <p class="text-[11px] text-muted-foreground">
+                                    Verifikasi & setujui permohonan teknisi
+                                </p>
+                            </div>
+                        </div>
+                        <span
+                            v-if="pendingCount > 0"
+                            class="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-[#fb4f00] px-2 text-xs font-extrabold text-white shadow-xs"
+                        >
+                            {{ pendingCount }} Pending
+                        </span>
+                    </Link>
+
                     <!-- 1. Input Masuk -->
                     <Link
                         href="/barang-masuk"

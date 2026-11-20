@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowDownToLine,
     ArrowUpFromLine,
@@ -7,6 +7,7 @@ import {
     FileBarChart2,
     LayoutGrid,
     RadioTower,
+    ShieldCheck,
     UserCog,
     Users,
     Warehouse,
@@ -29,7 +30,12 @@ import { useRole } from '@/composables/useRole';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const { canViewReports, canManageUsers } = useRole();
+const { canViewReports, canManage, canManageUsers } = useRole();
+const page = usePage();
+
+const pendingCount = computed<number>(() => {
+    return (page.props as any).pending_approvals_count ?? 0;
+});
 
 const mainNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
@@ -39,6 +45,16 @@ const mainNavItems = computed<NavItem[]>(() => {
             icon: LayoutGrid,
         },
     ];
+
+    if (canManage.value) {
+        items.push({
+            title: 'Persetujuan SPV',
+            href: '/persetujuan',
+            icon: ShieldCheck,
+            badge:
+                pendingCount.value > 0 ? String(pendingCount.value) : undefined,
+        });
+    }
 
     const gudangSubItems: NavItem[] = [
         {

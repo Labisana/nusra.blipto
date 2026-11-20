@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('inventory.outgoing.destroy');
 
     // Persetujuan SPV untuk transaksi
+    Route::get('persetujuan', [TransactionApprovalController::class, 'index'])
+        ->name('inventory.approvals');
     Route::post('transaksi/{transaction}/setujui', [TransactionApprovalController::class, 'approve'])
         ->name('inventory.transactions.approve');
     Route::post('transaksi/{transaction}/tolak', [TransactionApprovalController::class, 'reject'])

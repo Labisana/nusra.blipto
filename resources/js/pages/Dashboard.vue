@@ -12,6 +12,7 @@ import {
     RadioTower,
     Search,
     ShieldAlert,
+    ShieldCheck,
     TriangleAlert,
     Users,
 } from '@lucide/vue';
@@ -200,16 +201,15 @@ const stats = computed(() => [
             </div>
             <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
                 <Link
-                    href="/barang-masuk"
-                    class="rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-all hover:border-[#fb4f00] active:scale-95"
+                    href="/persetujuan"
+                    class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#fb4f00] to-[#ff6b26] px-4 py-2 text-xs font-bold text-white shadow-xs transition-all hover:brightness-105 active:scale-95"
                 >
-                    Barang Masuk
-                </Link>
-                <Link
-                    href="/barang-keluar"
-                    class="rounded-xl bg-gradient-to-r from-[#fb4f00] to-[#ff6b26] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:brightness-105 active:scale-95"
-                >
-                    Barang Keluar
+                    <ShieldCheck class="size-4" />
+                    <span
+                        >Pusat Persetujuan ({{
+                            props.stats.pending_approvals
+                        }})</span
+                    >
                 </Link>
             </div>
         </div>

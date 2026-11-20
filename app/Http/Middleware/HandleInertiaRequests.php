@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\StockTransaction;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -56,6 +57,31 @@ class HandleInertiaRequests extends Middleware
                 'toast' => fn (): ?array => $request->session()->get('toast'),
                 'whatsapp_report' => fn (): ?array => $request->session()->get('whatsapp_report'),
             ],
+            'pending_approvals_count' => fn (): int => $user && $user->canManage()
+                ? StockTransaction::query()->pending()->count()
+                : 0,
+            'pending_approvals' => fn (): array => $user && $user->canManage()
+                ? StockTransaction::query()
+                    ->pending()
+                    ->with(['user:id,name', 'customer:id,nama_pelanggan', 'items.item'])
+                    ->orderByDesc('id')
+                    ->limit(8)
+                    ->get()
+                    ->map(fn ($t) => [
+                        'id' => $t->id,
+                        'reference' => $t->reference,
+                        'direction' => $t->direction->value,
+                        'direction_label' => $t->direction->label(),
+                        'activity' => $t->activity->value,
+                        'date' => $t->transaction_date->format('d/m/Y'),
+                        'created_at_human' => $t->created_at?->diffForHumans() ?? '',
+                        'user_name' => $t->user?->name ?? 'Teknisi',
+                        'customer_name' => $t->customer?->nama_pelanggan,
+                        'items_count' => $t->items->count(),
+                        'summary' => $t->items->map(fn ($i) => "{$i->quantity}x {$i->item->name}")->join(', '),
+                    ])
+                    ->toArray()
+                : [],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

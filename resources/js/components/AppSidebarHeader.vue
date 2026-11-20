@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ApprovalNotificationDropdown from '@/components/ApprovalNotificationDropdown.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -36,6 +37,7 @@ withDefaults(
                 ></span>
                 <span>BLiP Online</span>
             </div>
+            <ApprovalNotificationDropdown />
             <ThemeToggle />
         </div>
     </header>

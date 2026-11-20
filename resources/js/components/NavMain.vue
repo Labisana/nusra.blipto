@@ -106,9 +106,18 @@ watch(
                         :is-active="isCurrentUrl(item.href)"
                         :tooltip="item.title"
                     >
-                        <Link :href="item.href">
+                        <Link
+                            :href="item.href"
+                            class="flex w-full items-center"
+                        >
                             <component :is="item.icon" v-if="item.icon" />
                             <span>{{ item.title }}</span>
+                            <span
+                                v-if="item.badge"
+                                class="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fb4f00] px-1.5 text-[10px] font-extrabold text-white shadow-xs"
+                            >
+                                {{ item.badge }}
+                            </span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
