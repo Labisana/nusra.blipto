@@ -46,16 +46,6 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
-    if (canApprove.value) {
-        items.push({
-            title: 'Approval Hub',
-            href: '/persetujuan',
-            icon: ShieldCheck,
-            badge:
-                pendingCount.value > 0 ? String(pendingCount.value) : undefined,
-        });
-    }
-
     const gudangSubItems: NavItem[] = [
         {
             title: 'Barang Masuk',
@@ -89,18 +79,27 @@ const mainNavItems = computed<NavItem[]>(() => {
         items: gudangSubItems,
     });
 
-    items.push(
-        {
-            title: 'Pelanggan',
-            href: '/pelanggan',
-            icon: Users,
-        },
-        {
-            title: 'Data BTS/BSC',
-            href: '/bts-bsc',
-            icon: RadioTower,
-        },
-    );
+    items.push({
+        title: 'Pelanggan',
+        href: '/pelanggan',
+        icon: Users,
+    });
+
+    if (canApprove.value) {
+        items.push({
+            title: 'Approval Hub',
+            href: '/persetujuan',
+            icon: ShieldCheck,
+            badge:
+                pendingCount.value > 0 ? String(pendingCount.value) : undefined,
+        });
+    }
+
+    items.push({
+        title: 'Data BTS/BSC',
+        href: '/bts-bsc',
+        icon: RadioTower,
+    });
 
     if (canManageUsers.value) {
         items.push({
