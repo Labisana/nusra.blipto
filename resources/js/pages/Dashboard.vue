@@ -260,19 +260,25 @@ const stats = computed(() => [
                 </Link>
             </div>
 
-            <!-- Desktop Table View -->
-            <div class="hidden overflow-x-auto md:block">
-                <table class="w-full text-left text-sm">
+            <!-- Swipeable Table (Bisa digeser di layar HP) -->
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[650px] text-left text-sm">
                     <thead
                         class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
                     >
                         <tr>
-                            <th class="px-5 py-3">Tanggal</th>
-                            <th class="px-5 py-3">Perangkat / Barang</th>
-                            <th class="px-5 py-3">Tipe</th>
-                            <th class="px-5 py-3 text-right">Jumlah</th>
-                            <th class="px-5 py-3">No. Referensi</th>
-                            <th class="px-5 py-3">Petugas</th>
+                            <th class="px-5 py-3 whitespace-nowrap">Tanggal</th>
+                            <th class="px-5 py-3 whitespace-nowrap">
+                                Perangkat / Barang
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">Tipe</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">
+                                Jumlah
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">
+                                No. Referensi
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">Petugas</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border/50 text-xs">
@@ -287,11 +293,11 @@ const stats = computed(() => [
                                 {{ r.date }}
                             </td>
                             <td
-                                class="min-w-[200px] px-5 py-3 font-medium text-foreground"
+                                class="min-w-[200px] px-5 py-3 font-medium whitespace-nowrap text-foreground"
                             >
                                 {{ r.item }}
                             </td>
-                            <td class="px-5 py-3">
+                            <td class="px-5 py-3 whitespace-nowrap">
                                 <span
                                     class="inline-flex rounded-full border border-border/80 bg-background px-2 py-0.5 text-[10px] font-medium"
                                 >
@@ -329,52 +335,6 @@ const stats = computed(() => [
                         </tr>
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Mobile Card View (Styled identically to Barang Keluar) -->
-            <div class="block divide-y divide-border/60 md:hidden">
-                <div
-                    v-for="r in recentIncoming"
-                    :key="r.id"
-                    class="space-y-2.5 p-4 transition-colors active:bg-muted/30"
-                >
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="min-w-0 flex-1">
-                            <p
-                                class="text-xs font-bold break-words text-foreground"
-                            >
-                                {{ r.item }}
-                            </p>
-                            <p class="mt-0.5 text-[11px] text-muted-foreground">
-                                {{ r.date }} · Ref:
-                                <span class="font-mono font-medium">{{
-                                    r.ref
-                                }}</span>
-                            </p>
-                        </div>
-                        <span
-                            class="inline-flex shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400"
-                        >
-                            +{{ r.qty }}
-                        </span>
-                    </div>
-                    <div
-                        class="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground"
-                    >
-                        <span
-                            class="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-medium"
-                        >
-                            {{ r.type }}
-                        </span>
-                        <span>Petugas: {{ r.user }}</span>
-                    </div>
-                </div>
-                <div
-                    v-if="!recentIncoming.length"
-                    class="p-6 text-center text-xs text-muted-foreground"
-                >
-                    Belum ada transaksi barang masuk.
-                </div>
             </div>
         </div>
 
@@ -422,69 +382,91 @@ const stats = computed(() => [
                 </Link>
             </div>
 
-            <!-- Content Area: Responsive Grid of Cards -->
-            <div v-if="lowStock.length" class="p-3 sm:p-4">
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <div
-                        v-for="l in lowStock"
-                        :key="l.item"
-                        class="group flex flex-col justify-between rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-3.5 transition-all hover:border-amber-500/50 hover:bg-amber-500/[0.08]"
+            <!-- Swipeable Table (Bisa digeser di layar HP persis Barang Keluar) -->
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[580px] text-left text-sm">
+                    <thead
+                        class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
                     >
-                        <div class="flex items-start justify-between gap-2">
-                            <div class="min-w-0 flex-1">
-                                <p
-                                    class="text-xs font-bold break-words text-foreground"
-                                >
-                                    {{ l.item }}
-                                </p>
+                        <tr>
+                            <th class="px-5 py-3 whitespace-nowrap">
+                                Nama Barang / Perangkat
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">Jenis</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">
+                                Sisa Stok
+                            </th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">
+                                Batas Minimum
+                            </th>
+                            <th class="px-5 py-3 text-center whitespace-nowrap">
+                                Status
+                            </th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">
+                                Aksi
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border/50 text-xs">
+                        <tr
+                            v-for="l in lowStock"
+                            :key="l.item"
+                            class="transition-colors hover:bg-amber-500/[0.04]"
+                        >
+                            <td
+                                class="min-w-[200px] px-5 py-3 font-semibold whitespace-nowrap text-foreground"
+                            >
+                                {{ l.item }}
+                            </td>
+                            <td class="px-5 py-3 whitespace-nowrap">
                                 <span
-                                    class="mt-1 inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                    class="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
                                 >
                                     {{ l.type }}
                                 </span>
-                            </div>
-                            <span
-                                class="inline-flex shrink-0 rounded-lg bg-amber-500/20 px-2.5 py-1 text-xs font-extrabold text-amber-600 dark:text-amber-400"
+                            </td>
+                            <td class="px-5 py-3 text-right whitespace-nowrap">
+                                <span
+                                    class="inline-flex rounded-lg bg-amber-500/20 px-2.5 py-1 text-xs font-extrabold text-amber-600 dark:text-amber-400"
+                                >
+                                    Sisa {{ l.stock }}
+                                </span>
+                            </td>
+                            <td
+                                class="px-5 py-3 text-right font-medium whitespace-nowrap text-muted-foreground"
                             >
-                                Sisa {{ l.stock }}
-                            </span>
-                        </div>
-                        <div
-                            class="mt-3 flex items-center justify-between border-t border-border/50 pt-2 text-[11px] text-muted-foreground"
-                        >
-                            <span
-                                >Batas Minimum:
-                                <strong class="text-foreground">{{
-                                    l.min
-                                }}</strong></span
+                                {{ l.min }} unit
+                            </td>
+                            <td class="px-5 py-3 text-center whitespace-nowrap">
+                                <span
+                                    class="inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
+                                >
+                                    Menipis
+                                </span>
+                            </td>
+                            <td class="px-5 py-3 text-right whitespace-nowrap">
+                                <Link
+                                    href="/barang-masuk"
+                                    class="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-[#fb4f00] transition-colors hover:border-[#fb4f00] hover:bg-[#fb4f00]/5 active:scale-95"
+                                >
+                                    + Restok
+                                </Link>
+                            </td>
+                        </tr>
+                        <tr v-if="!lowStock.length">
+                            <td
+                                colspan="6"
+                                class="px-5 py-8 text-center text-muted-foreground"
                             >
-                            <Link
-                                href="/barang-masuk"
-                                class="font-semibold text-[#fb4f00] hover:underline active:scale-95"
-                            >
-                                + Restok
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Empty State if no low stock -->
-            <div
-                v-else
-                class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
-            >
-                <div
-                    class="mb-2 rounded-full bg-emerald-500/10 p-3 text-emerald-500"
-                >
-                    <Package class="size-6" />
-                </div>
-                <p class="text-xs font-bold text-foreground">
-                    Semua Stok Gudang Aman
-                </p>
-                <p class="mt-0.5 text-[11px] text-muted-foreground">
-                    Tidak ada item yang berada di bawah kuota minimum saat ini.
-                </p>
+                                <Package
+                                    class="mx-auto mb-2 size-8 text-emerald-500/50"
+                                />
+                                Semua stok gudang aman (berada di atas kuota
+                                minimum).
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -522,20 +504,28 @@ const stats = computed(() => [
                     />
                 </Link>
             </div>
-            <!-- Desktop Table View -->
-            <div class="hidden overflow-x-auto md:block">
-                <table class="w-full text-left text-sm">
+            <!-- Swipeable Table (Bisa digeser di layar HP) -->
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[700px] text-left text-sm">
                     <thead
                         class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
                     >
                         <tr>
-                            <th class="px-5 py-3">Tanggal</th>
-                            <th class="px-5 py-3">Perangkat / Barang</th>
-                            <th class="px-5 py-3">Tipe</th>
-                            <th class="px-5 py-3 text-right">Jumlah</th>
-                            <th class="px-5 py-3">No. Referensi</th>
-                            <th class="px-5 py-3">Pelanggan / Tujuan</th>
-                            <th class="px-5 py-3">Petugas</th>
+                            <th class="px-5 py-3 whitespace-nowrap">Tanggal</th>
+                            <th class="px-5 py-3 whitespace-nowrap">
+                                Perangkat / Barang
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">Tipe</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">
+                                Jumlah
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">
+                                No. Referensi
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">
+                                Pelanggan / Tujuan
+                            </th>
+                            <th class="px-5 py-3 whitespace-nowrap">Petugas</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border/50 text-xs">
@@ -550,11 +540,11 @@ const stats = computed(() => [
                                 {{ r.date }}
                             </td>
                             <td
-                                class="min-w-[200px] px-5 py-3 font-medium text-foreground"
+                                class="min-w-[200px] px-5 py-3 font-medium whitespace-nowrap text-foreground"
                             >
                                 {{ r.item }}
                             </td>
-                            <td class="px-5 py-3">
+                            <td class="px-5 py-3 whitespace-nowrap">
                                 <span
                                     class="inline-flex rounded-full border border-border/80 bg-background px-2 py-0.5 text-[10px] font-medium"
                                 >
@@ -571,10 +561,10 @@ const stats = computed(() => [
                             >
                                 {{ r.ref }}
                             </td>
-                            <td class="min-w-[220px] px-5 py-3">
-                                <span class="font-medium text-foreground">{{
-                                    r.customer
-                                }}</span>
+                            <td
+                                class="min-w-[220px] px-5 py-3 font-medium whitespace-nowrap text-foreground"
+                            >
+                                {{ r.customer }}
                             </td>
                             <td class="px-5 py-3 whitespace-nowrap">
                                 <span
@@ -597,51 +587,6 @@ const stats = computed(() => [
                         </tr>
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Mobile Card View -->
-            <div class="block divide-y divide-border/60 md:hidden">
-                <div
-                    v-for="r in recentOutgoing"
-                    :key="r.id"
-                    class="space-y-2.5 p-4 transition-colors active:bg-muted/30"
-                >
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="min-w-0 flex-1">
-                            <p
-                                class="text-xs font-bold break-words text-foreground"
-                            >
-                                {{ r.item }}
-                            </p>
-                            <p class="mt-0.5 text-[11px] text-muted-foreground">
-                                {{ r.date }} · Ref:
-                                <span class="font-mono font-medium">{{
-                                    r.ref
-                                }}</span>
-                            </p>
-                        </div>
-                        <span
-                            class="inline-flex shrink-0 rounded-full bg-[#fb4f00]/15 px-2.5 py-1 text-xs font-extrabold text-[#fb4f00]"
-                        >
-                            -{{ r.qty }}
-                        </span>
-                    </div>
-                    <div
-                        class="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground"
-                    >
-                        <span
-                            class="max-w-[65%] truncate font-medium text-foreground"
-                            >🎯 {{ r.customer }}</span
-                        >
-                        <span>Petugas: {{ r.user }}</span>
-                    </div>
-                </div>
-                <div
-                    v-if="!recentOutgoing.length"
-                    class="p-6 text-center text-xs text-muted-foreground"
-                >
-                    Belum ada transaksi barang keluar.
-                </div>
             </div>
         </div>
     </div>
