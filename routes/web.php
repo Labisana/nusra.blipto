@@ -38,12 +38,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('barang-keluar/{transaction}', [OutgoingTransactionController::class, 'destroy'])
         ->name('inventory.outgoing.destroy');
 
-    // Persetujuan SPV untuk transaksi
+    // Approval transaksi (Khusus Manager & SPV)
     Route::get('persetujuan', [TransactionApprovalController::class, 'index'])
+        ->middleware('can:approve-transactions')
         ->name('inventory.approvals');
     Route::post('transaksi/{transaction}/setujui', [TransactionApprovalController::class, 'approve'])
+        ->middleware('can:approve-transactions')
         ->name('inventory.transactions.approve');
     Route::post('transaksi/{transaction}/tolak', [TransactionApprovalController::class, 'reject'])
+        ->middleware('can:approve-transactions')
         ->name('inventory.transactions.reject');
 
     // Stock / master barang

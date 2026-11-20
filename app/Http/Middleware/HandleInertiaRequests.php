@@ -51,16 +51,17 @@ class HandleInertiaRequests extends Middleware
                     'can_manage' => $user->canManage(),
                     'can_view_reports' => $user->canViewReports(),
                     'can_manage_users' => $user->canManageUsers(),
+                    'can_approve' => $user->canApprove(),
                 ] : null,
             ],
             'flash' => [
                 'toast' => fn (): ?array => $request->session()->get('toast'),
                 'whatsapp_report' => fn (): ?array => $request->session()->get('whatsapp_report'),
             ],
-            'pending_approvals_count' => fn (): int => $user && $user->canManage()
+            'pending_approvals_count' => fn (): int => $user && $user->canApprove()
                 ? StockTransaction::query()->pending()->count()
                 : 0,
-            'pending_approvals' => fn (): array => $user && $user->canManage()
+            'pending_approvals' => fn (): array => $user && $user->canApprove()
                 ? StockTransaction::query()
                     ->pending()
                     ->with(['user:id,name', 'customer:id,nama_pelanggan', 'items.item'])

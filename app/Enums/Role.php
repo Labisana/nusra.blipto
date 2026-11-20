@@ -44,6 +44,14 @@ enum Role: string
     }
 
     /**
+     * Khusus Manager dan SPV yang dapat menyetujui transaksi (Approval Hub).
+     */
+    public function canApprove(): bool
+    {
+        return $this === self::Manager || $this === self::Spv;
+    }
+
+    /**
      * @return array<int, array{value: string, label: string}>
      */
     public static function options(): array

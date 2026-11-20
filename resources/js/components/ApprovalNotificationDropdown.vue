@@ -13,7 +13,7 @@ import {
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRole } from '@/composables/useRole';
 
-const { canManage } = useRole();
+const { canApprove } = useRole();
 const page = usePage();
 
 const isOpen = ref(false);
@@ -65,7 +65,7 @@ function reject(id: number) {
 </script>
 
 <template>
-    <div v-if="canManage" ref="dropdownRef" class="relative">
+    <div v-if="canApprove" ref="dropdownRef" class="relative">
         <!-- Bell Trigger Button -->
         <button
             type="button"
@@ -74,7 +74,7 @@ function reject(id: number) {
                 'border-[#fb4f00] bg-[#fb4f00]/5 ring-2 ring-[#fb4f00]/20':
                     isOpen,
             }"
-            aria-label="Persetujuan Transaksi"
+            aria-label="Approval Transaksi"
             @click="toggleDropdown"
         >
             <Bell class="size-4 text-foreground" />
@@ -109,7 +109,7 @@ function reject(id: number) {
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-foreground">
-                            Persetujuan SPV
+                            Approval Hub
                         </h4>
                         <p class="text-[10px] text-muted-foreground">
                             {{ pendingCount }} permintaan menunggu
@@ -224,7 +224,7 @@ function reject(id: number) {
                     class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-background py-2 text-xs font-bold text-foreground transition-all hover:border-[#fb4f00]/40 hover:text-[#fb4f00] active:scale-95"
                     @click="closeDropdown"
                 >
-                    <span>Buka Halaman Persetujuan</span>
+                    <span>Buka Approval Hub</span>
                     <ArrowRight class="size-3.5" />
                 </Link>
             </div>

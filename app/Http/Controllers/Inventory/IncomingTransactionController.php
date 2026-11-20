@@ -55,7 +55,7 @@ class IncomingTransactionController extends Controller
 
         $isPending = $transaction->isPending();
         $message = $isPending
-            ? "Permintaan barang masuk {$transaction->reference} berhasil diajukan dan menunggu persetujuan SPV."
+            ? "Permintaan barang masuk {$transaction->reference} berhasil diajukan dan menunggu approval."
             : "Barang masuk {$transaction->reference} berhasil disimpan.";
 
         return to_route('inventory.incoming')

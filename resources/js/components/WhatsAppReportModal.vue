@@ -57,10 +57,10 @@ const generatedMessage = computed(() => {
 
     lines.push('');
     if (r.status === 'pending') {
-        lines.push('⏳ *Status:* *MENUNGGU PERSETUJUAN SPV*');
+        lines.push('⏳ *Status:* *MENUNGGU APPROVAL*');
         lines.push('--------------------------------------------------');
         lines.push(
-            'Kepada Yth. Bapak/Ibu SPV, mohon untuk dapat melakukan verifikasi & persetujuan pada sistem:',
+            'Kepada Yth. Bapak/Ibu Manager & SPV, mohon untuk dapat melakukan verifikasi & approval pada sistem:',
         );
     } else if (r.status === 'approved') {
         lines.push('✅ *Status:* *DISETUJUI / SELESAI*');
@@ -165,7 +165,7 @@ function sendWhatsApp() {
                     <span>
                         Inputan telah disimpan sebagai
                         <strong>Permintaan</strong> dan sedang
-                        <strong>menunggu persetujuan SPV</strong>.
+                        <strong>menunggu approval SPV / Manager</strong>.
                     </span>
                 </div>
                 <div

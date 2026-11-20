@@ -30,7 +30,7 @@ import { useRole } from '@/composables/useRole';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const { canViewReports, canManage, canManageUsers } = useRole();
+const { canViewReports, canManage, canManageUsers, canApprove } = useRole();
 const page = usePage();
 
 const pendingCount = computed<number>(() => {
@@ -46,9 +46,9 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
-    if (canManage.value) {
+    if (canApprove.value) {
         items.push({
-            title: 'Persetujuan SPV',
+            title: 'Approval Hub',
             href: '/persetujuan',
             icon: ShieldCheck,
             badge:

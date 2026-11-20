@@ -13,6 +13,7 @@ type SharedProps = {
             can_manage: boolean;
             can_view_reports: boolean;
             can_manage_users: boolean;
+            can_approve: boolean;
         } | null;
     };
 };
@@ -43,6 +44,11 @@ export function useRole() {
             user.value?.can_manage_users ??
             (role.value === 'manager' || role.value === 'spv'),
     );
+    const canApprove = computed(
+        () =>
+            user.value?.can_approve ??
+            (role.value === 'manager' || role.value === 'spv'),
+    );
 
     return {
         role,
@@ -54,5 +60,6 @@ export function useRole() {
         canManage,
         canViewReports,
         canManageUsers,
+        canApprove,
     };
 }

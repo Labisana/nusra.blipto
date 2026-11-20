@@ -101,6 +101,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->role->canManageUsers();
     }
 
+    public function canApprove(): bool
+    {
+        return $this->role->canApprove();
+    }
+
     /**
      * @param  Builder<$this>  $query
      * @return Builder<$this>

@@ -38,7 +38,7 @@ const props = defineProps<{
     activities: SelectOption[];
 }>();
 
-const { roleLabel, canManage } = useRole();
+const { roleLabel, canManage, canApprove } = useRole();
 const showForm = ref(false);
 const editingId = ref<number | null>(null);
 const search = ref('');
@@ -72,7 +72,7 @@ function openWhatsAppReport(transaction: StockTransaction) {
         status_label:
             transaction.status_label ??
             (transaction.status === 'pending'
-                ? 'Menunggu SPV'
+                ? 'Menunggu Approval'
                 : transaction.status === 'approved'
                   ? 'Disetujui'
                   : 'Ditolak'),
@@ -88,6 +88,7 @@ function openWhatsAppReport(transaction: StockTransaction) {
 }
 
 function approveTransaction(transactionId: number) {
+    if (!canApprove.value) return;
     if (
         !confirm(
             'Setujui permintaan barang masuk ini? Stok gudang akan resmi bertambah.',
@@ -103,6 +104,7 @@ function approveTransaction(transactionId: number) {
 }
 
 function rejectTransaction(transactionId: number) {
+    if (!canApprove.value) return;
     const reason = prompt('Masukkan alasan penolakan permintaan ini:');
     if (reason === null) return;
     router.post(
@@ -161,7 +163,7 @@ const rows = computed(() =>
             status_label:
                 transaction.status_label ??
                 (transaction.status === 'pending'
-                    ? 'Menunggu SPV'
+                    ? 'Menunggu Approval'
                     : transaction.status === 'approved'
                       ? 'Disetujui'
                       : 'Ditolak'),
@@ -410,7 +412,7 @@ function lineError(
                                     class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
                                 >
                                     <Clock class="size-3" />
-                                    Menunggu SPV
+                                    Menunggu Approval
                                 </span>
                                 <span
                                     v-else-if="r.status === 'approved'"
@@ -500,10 +502,10 @@ function lineError(
                                         <span>WA</span>
                                     </button>
 
-                                    <!-- SPV Quick Approval / Reject -->
+                                    <!-- Quick Approval / Reject (Manager & SPV) -->
                                     <template
                                         v-if="
-                                            canManage && r.status === 'pending'
+                                            canApprove && r.status === 'pending'
                                         "
                                     >
                                         <button
@@ -588,7 +590,7 @@ function lineError(
                                     class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
                                 >
                                     <Clock class="size-3" />
-                                    Menunggu SPV
+                                    Menunggu Approval
                                 </span>
                                 <span
                                     v-else-if="r.status === 'approved'"
@@ -644,9 +646,9 @@ function lineError(
                         </p>
                     </div>
 
-                    <!-- SPV Quick Approval on Mobile -->
+                    <!-- Quick Approval on Mobile (Manager & SPV) -->
                     <div
-                        v-if="canManage && r.status === 'pending'"
+                        v-if="canApprove && r.status === 'pending'"
                         class="flex items-center gap-2 pt-1"
                     >
                         <button

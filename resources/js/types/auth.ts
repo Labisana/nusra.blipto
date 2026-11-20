@@ -8,6 +8,7 @@ export type User = {
     can_manage?: boolean;
     can_view_reports?: boolean;
     can_manage_users?: boolean;
+    can_approve?: boolean;
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;

@@ -11,7 +11,7 @@ enum TransactionStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => 'Menunggu SPV',
+            self::Pending => 'Menunggu Approval',
             self::Approved => 'Disetujui',
             self::Rejected => 'Ditolak',
         };

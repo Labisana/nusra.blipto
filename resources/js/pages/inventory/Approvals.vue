@@ -28,7 +28,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Persetujuan SPV', href: '/persetujuan' },
+            { title: 'Approval Hub', href: '/persetujuan' },
         ],
     },
 });
@@ -45,7 +45,7 @@ const props = defineProps<{
     };
 }>();
 
-const { canManage } = useRole();
+const { canApprove } = useRole();
 
 // Filter & Tab states
 const activeTab = ref<'pending' | 'history'>('pending');
@@ -168,7 +168,7 @@ function openWhatsApp(t: StockTransaction) {
         status_label:
             t.status_label ??
             (t.status === 'pending'
-                ? 'Menunggu SPV'
+                ? 'Menunggu Approval'
                 : t.status === 'approved'
                   ? 'Disetujui'
                   : 'Ditolak'),
@@ -185,7 +185,7 @@ function openWhatsApp(t: StockTransaction) {
 </script>
 
 <template>
-    <Head title="Pusat Persetujuan SPV" />
+    <Head title="Approval Hub - Persetujuan Transaksi" />
 
     <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
         <!-- Header Banner with Glassmorphism & BLiP Accents -->
@@ -208,7 +208,7 @@ function openWhatsApp(t: StockTransaction) {
                             class="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400"
                         >
                             <ShieldCheck class="size-3.5" />
-                            SPV Approval Hub
+                            Approval Hub
                         </span>
                         <span
                             v-if="stats.pending_total > 0"
@@ -220,7 +220,7 @@ function openWhatsApp(t: StockTransaction) {
                     <h1
                         class="mt-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl"
                     >
-                        Pusat Persetujuan Transaksi
+                        Approval Hub Transaksi
                     </h1>
                     <p class="mt-1 text-sm text-muted-foreground">
                         Verifikasi, setujui, atau tolak permohonan transaksi
@@ -252,7 +252,7 @@ function openWhatsApp(t: StockTransaction) {
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-muted-foreground">
-                            Menunggu Persetujuan
+                            Menunggu Approval
                         </p>
                         <p
                             class="mt-1.5 text-3xl font-extrabold text-amber-600 dark:text-amber-400"
@@ -267,7 +267,7 @@ function openWhatsApp(t: StockTransaction) {
                     </div>
                 </div>
                 <p class="mt-3 text-[11px] text-muted-foreground">
-                    Perlu tindakan verifikasi SPV
+                    Perlu tindakan verifikasi SPV / Manager
                 </p>
             </div>
 
@@ -376,7 +376,7 @@ function openWhatsApp(t: StockTransaction) {
                     @click="activeTab = 'pending'"
                 >
                     <Clock class="size-3.5" />
-                    <span>Menunggu Persetujuan</span>
+                    <span>Menunggu Approval</span>
                     <span
                         v-if="stats.pending_total > 0"
                         class="py-0.2 rounded-full bg-[#fb4f00]/15 px-1.5 text-[10px] font-extrabold text-[#fb4f00]"
@@ -529,7 +529,7 @@ function openWhatsApp(t: StockTransaction) {
                                 class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400"
                             >
                                 <Clock class="size-3" />
-                                Menunggu SPV
+                                Menunggu Approval
                             </span>
                             <span
                                 v-else-if="t.status === 'approved'"

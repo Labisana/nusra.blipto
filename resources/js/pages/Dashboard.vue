@@ -45,7 +45,7 @@ const props = defineProps<{
     lowStock: { item: string; stock: number; min: number; type: string }[];
 }>();
 
-const { roleLabel, role, canViewReports, canManage } = useRole();
+const { roleLabel, role, canViewReports, canManage, canApprove } = useRole();
 
 const currentDate = new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',
@@ -177,9 +177,9 @@ const stats = computed(() => [
             </div>
         </div>
 
-        <!-- Pending Approval Alert for SPV / Admin -->
+        <!-- Pending Approval Alert for Manager / SPV -->
         <div
-            v-if="canManage && (props.stats.pending_approvals || 0) > 0"
+            v-if="canApprove && (props.stats.pending_approvals || 0) > 0"
             class="flex flex-col items-start justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 shadow-xs sm:flex-row sm:items-center"
         >
             <div class="flex items-center gap-3">
@@ -191,11 +191,11 @@ const stats = computed(() => [
                 <div>
                     <h3 class="text-sm font-bold text-foreground">
                         {{ props.stats.pending_approvals }} Permintaan Transaksi
-                        Menunggu Persetujuan
+                        Menunggu Approval
                     </h3>
                     <p class="text-xs text-muted-foreground">
                         Inputan dari tim teknis memerlukan verifikasi &
-                        persetujuan SPV sebelum memutasi stok gudang.
+                        approval sebelum memutasi stok gudang.
                     </p>
                 </div>
             </div>
@@ -206,7 +206,7 @@ const stats = computed(() => [
                 >
                     <ShieldCheck class="size-4" />
                     <span
-                        >Pusat Persetujuan ({{
+                        >Approval Hub ({{
                             props.stats.pending_approvals
                         }})</span
                     >

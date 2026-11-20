@@ -59,7 +59,7 @@ class OutgoingTransactionController extends Controller
 
         $isPending = $transaction->isPending();
         $message = $isPending
-            ? "Permintaan barang keluar {$transaction->reference} berhasil diajukan dan menunggu persetujuan SPV."
+            ? "Permintaan barang keluar {$transaction->reference} berhasil diajukan dan menunggu approval."
             : "Barang keluar {$transaction->reference} berhasil disimpan.";
 
         return to_route('inventory.outgoing')

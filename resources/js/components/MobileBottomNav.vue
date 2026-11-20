@@ -17,7 +17,7 @@ import { useRole } from '@/composables/useRole';
 import { dashboard } from '@/routes';
 
 const page = usePage();
-const { canViewReports, canManage } = useRole();
+const { canViewReports, canManage, canApprove } = useRole();
 const showQuickActions = ref(false);
 
 const currentUrl = computed(() => page.url);
@@ -212,9 +212,9 @@ function closeQuickActions() {
 
                 <!-- Grid of Quick Action Cards -->
                 <div class="grid grid-cols-2 gap-3">
-                    <!-- Persetujuan SPV Banner (Khusus SPV/Admin) -->
+                    <!-- Approval Hub Banner (Khusus Manager & SPV) -->
                     <Link
-                        v-if="canManage"
+                        v-if="canApprove"
                         href="/persetujuan"
                         class="group col-span-2 flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 transition-all hover:bg-amber-500/15 active:scale-95"
                         @click="closeQuickActions"
@@ -227,7 +227,7 @@ function closeQuickActions() {
                             </div>
                             <div>
                                 <p class="text-sm font-bold text-foreground">
-                                    Pusat Persetujuan SPV
+                                    Approval Hub
                                 </p>
                                 <p class="text-[11px] text-muted-foreground">
                                     Verifikasi & setujui permohonan teknisi
