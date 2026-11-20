@@ -179,6 +179,8 @@ echo "=========================================="
 sudo chown -R www-data:www-data "$WEB_DIR"
 sudo find "$WEB_DIR" -type f -exec chmod 644 {} \;
 sudo find "$WEB_DIR" -type d -exec chmod 755 {} \;
+sudo chmod +x "$WEB_DIR/artisan" 2>/dev/null || true
+sudo chmod -R +x "$WEB_DIR/node_modules/.bin" 2>/dev/null || true
 sudo chmod -R 775 "$WEB_DIR/storage" "$WEB_DIR/bootstrap/cache"
 
 echo "=========================================="
