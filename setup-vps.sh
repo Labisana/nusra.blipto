@@ -32,26 +32,29 @@ sudo apt-get install -y curl git unzip zip software-properties-common ca-certifi
 echo "=========================================="
 echo " 3. Memasang Repository PHP 8.4"
 echo "=========================================="
-if [ "$OS" = "debian" ]; then
-    echo "Menambahkan Sury PHP repo untuk Debian ($CODENAME)..."
+# Bersihkan repository lama jika ada konflik
+sudo rm -f /etc/apt/sources.list.d/ondrej-ubuntu-php-resolute.sources 2>/dev/null || true
+
+if [ "$CODENAME" = "resolute" ] || [ "$OS" = "debian" ]; then
+    echo "Menambahkan Sury PHP repo untuk $OS ($CODENAME)..."
     sudo curl -sSLo /etc/apt/trusted.gpg.d/sury-php.gpg https://packages.sury.org/php/apt.gpg
     echo "deb https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/sury-php.list
     sudo apt-get update -y
 elif [ "$OS" = "ubuntu" ]; then
-    echo "Menambahkan PPA ondrej/php untuk Ubuntu ($CODENAME)..."
-    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php || {
-        echo "Fallback: Menambahkan PPA via launchpadcontent.net..."
-        sudo mkdir -p /etc/apt/trusted.gpg.d
-        sudo curl -sSLo /etc/apt/trusted.gpg.d/ondrej-php.gpg 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c' || true
-        echo "deb [signed-by=/etc/apt/trusted.gpg.d/ondrej-php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/ondrej-php.list
-    }
+    echo "Menambahkan repo PHP untuk Ubuntu ($CODENAME)..."
+    sudo curl -sSLo /etc/apt/trusted.gpg.d/sury-php.gpg https://packages.sury.org/php/apt.gpg
+    echo "deb https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/sury-php.list
     sudo apt-get update -y
+    # Jika gagal mencari paket, fallback ke PPA ondrej
+    if ! apt-cache show php8.4-fpm &>/dev/null; then
+        echo "Mencoba fallback PPA ondrej/php..."
+        sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php || true
+        sudo apt-get update -y
+    fi
 else
-    echo "Distro turunan terdeteksi ($OS)..."
-    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php 2>/dev/null || {
-        sudo curl -sSLo /etc/apt/trusted.gpg.d/sury-php.gpg https://packages.sury.org/php/apt.gpg || true
-        echo "deb https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/sury-php.list
-    }
+    echo "Distro lain terdeteksi ($OS / $CODENAME)..."
+    sudo curl -sSLo /etc/apt/trusted.gpg.d/sury-php.gpg https://packages.sury.org/php/apt.gpg || true
+    echo "deb https://packages.sury.org/php/ ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/sury-php.list || true
     sudo apt-get update -y
 fi
 
