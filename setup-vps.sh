@@ -189,7 +189,6 @@ NGINX_CONF="/etc/nginx/sites-available/nusra.blipto"
 sudo tee "$NGINX_CONF" > /dev/null << 'EOF'
 server {
     listen 80 default_server;
-    listen [::]:80 default_server;
 
     server_name 103.217.144.69 nusratim.my.id www.nusratim.my.id;
     root /var/www/nusra.blipto/public;
