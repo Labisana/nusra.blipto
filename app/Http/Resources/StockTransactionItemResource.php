@@ -23,10 +23,9 @@ class StockTransactionItemResource extends JsonResource
             'item_type' => $this->whenLoaded('item', fn (): string => $this->item->type->value),
             'item_type_label' => $this->whenLoaded('item', fn (): string => $this->item->type->label()),
             'quantity' => $this->quantity,
-            'serials' => $this->whenLoaded(
-                'serialNumbers',
-                fn (): array => $this->serialNumbers->pluck('serial_number')->all(),
-            ),
+            'serials' => $this->relationLoaded('serialNumbers') && $this->serialNumbers->isNotEmpty()
+                ? $this->serialNumbers->pluck('serial_number')->all()
+                : ($this->serials_json ?? []),
         ];
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Inventory\IncomingTransactionController;
 use App\Http\Controllers\Inventory\ItemController;
 use App\Http\Controllers\Inventory\OutgoingTransactionController;
 use App\Http\Controllers\Inventory\ReportController;
+use App\Http\Controllers\Inventory\TransactionApprovalController;
 use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,12 @@ Route::middleware(['auth'])->group(function () {
         ->name('inventory.outgoing.update');
     Route::delete('barang-keluar/{transaction}', [OutgoingTransactionController::class, 'destroy'])
         ->name('inventory.outgoing.destroy');
+
+    // Persetujuan SPV untuk transaksi
+    Route::post('transaksi/{transaction}/setujui', [TransactionApprovalController::class, 'approve'])
+        ->name('inventory.transactions.approve');
+    Route::post('transaksi/{transaction}/tolak', [TransactionApprovalController::class, 'reject'])
+        ->name('inventory.transactions.reject');
 
     // Stock / master barang
     Route::get('gudang', fn () => redirect()->route('inventory.stock'))->name('inventory.gudang');

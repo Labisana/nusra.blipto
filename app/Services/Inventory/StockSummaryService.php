@@ -3,6 +3,7 @@
 namespace App\Services\Inventory;
 
 use App\Enums\TransactionDirection;
+use App\Enums\TransactionStatus;
 use App\Models\Customer;
 use App\Models\Item;
 use App\Models\StockTransaction;
@@ -73,13 +74,18 @@ class StockSummaryService
         return [
             'incoming_this_month' => StockTransaction::query()
                 ->direction(TransactionDirection::In)
+                ->where('status', TransactionStatus::Approved)
                 ->whereMonth('transaction_date', now()->month)
                 ->whereYear('transaction_date', now()->year)
                 ->count(),
             'outgoing_this_month' => StockTransaction::query()
                 ->direction(TransactionDirection::Out)
+                ->where('status', TransactionStatus::Approved)
                 ->whereMonth('transaction_date', now()->month)
                 ->whereYear('transaction_date', now()->year)
+                ->count(),
+            'pending_approvals' => StockTransaction::query()
+                ->where('status', TransactionStatus::Pending)
                 ->count(),
             'total_remaining' => (int) $this->items()->sum(fn (Item $item): int => $item->remaining),
             'active_customers' => Customer::query()->active()->count(),

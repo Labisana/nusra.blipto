@@ -5,6 +5,7 @@ namespace App\Services\Inventory;
 use App\Enums\SerialStatus;
 use App\Enums\TransactionActivity;
 use App\Enums\TransactionDirection;
+use App\Enums\TransactionStatus;
 use App\Models\Item;
 use App\Models\SerialNumber;
 use App\Models\StockTransaction;
@@ -25,19 +26,83 @@ class StockTransactionService
             $activity = TransactionActivity::from($data['activity']);
             $this->assertActivityMatchesDirection($direction, $activity);
 
+            $status = $user->isTeknisi()
+                ? TransactionStatus::Pending
+                : TransactionStatus::Approved;
+
             $transaction = StockTransaction::query()->create([
                 'reference' => $this->resolveReference($direction, $data),
                 'direction' => $direction,
                 'activity' => $activity,
+                'status' => $status,
                 'customer_id' => $this->resolveCustomerId($activity, $data['customer_id'] ?? null),
                 'transaction_date' => $data['transaction_date'],
                 'note' => $data['note'] ?? null,
                 'user_id' => $user->id,
+                'approved_by' => $status === TransactionStatus::Approved ? $user->id : null,
+                'approved_at' => $status === TransactionStatus::Approved ? now() : null,
             ]);
 
             $this->applyLines($transaction, $data['items'] ?? []);
 
             return $transaction->load($this->defaultRelations());
+        }, 3);
+    }
+
+    public function approve(StockTransaction $transaction, User $approver): StockTransaction
+    {
+        return DB::transaction(function () use ($transaction, $approver): StockTransaction {
+            if ($transaction->status !== TransactionStatus::Pending) {
+                throw ValidationException::withMessages([
+                    'status' => 'Hanya transaksi berstatus pending yang dapat disetujui.',
+                ]);
+            }
+
+            $transaction->load(['items.item', 'items.serialNumbers']);
+
+            // Validate stock availability and execute mutations
+            foreach ($transaction->items as $transactionItem) {
+                $item = $transactionItem->item;
+                $quantity = $transactionItem->quantity;
+                $serials = $transactionItem->serials_json ?? [];
+
+                $this->assertStockAvailability($transaction, $item, $quantity, $serials);
+
+                if ($item->isSerial()) {
+                    $transaction->direction === TransactionDirection::In
+                        ? $this->receiveSerials($transaction, $transactionItem, $item, $serials)
+                        : $this->issueSerials($transaction, $transactionItem, $item, $serials);
+                }
+            }
+
+            $transaction->update([
+                'status' => TransactionStatus::Approved,
+                'approved_by' => $approver->id,
+                'approved_at' => now(),
+                'rejection_note' => null,
+            ]);
+
+            return $transaction->refresh()->load($this->defaultRelations());
+        }, 3);
+    }
+
+    public function reject(StockTransaction $transaction, User $approver, ?string $reason = null): StockTransaction
+    {
+        return DB::transaction(function () use ($transaction, $approver, $reason): StockTransaction {
+            if ($transaction->status !== TransactionStatus::Pending) {
+                throw ValidationException::withMessages([
+                    'status' => 'Hanya transaksi berstatus pending yang dapat ditolak.',
+                ]);
+            }
+
+            $transaction->update([
+                'status' => TransactionStatus::Rejected,
+                'approved_by' => $approver->id,
+                'approved_at' => now(),
+                'rejection_note' => $reason,
+            ]);
+
+            return $transaction->refresh()->load($this->defaultRelations());
         }, 3);
     }
 
@@ -96,12 +161,12 @@ class StockTransactionService
 
         $in = (int) StockTransactionItem::query()
             ->where('item_id', $item->id)
-            ->whereHas('transaction', fn ($query) => $query->where('direction', TransactionDirection::In))
+            ->whereHas('transaction', fn ($query) => $query->where('direction', TransactionDirection::In)->where('status', TransactionStatus::Approved))
             ->sum('quantity');
 
         $out = (int) StockTransactionItem::query()
             ->where('item_id', $item->id)
-            ->whereHas('transaction', fn ($query) => $query->where('direction', TransactionDirection::Out))
+            ->whereHas('transaction', fn ($query) => $query->where('direction', TransactionDirection::Out)->where('status', TransactionStatus::Approved))
             ->sum('quantity');
 
         return $in - $out;
@@ -122,9 +187,10 @@ class StockTransactionService
             $transactionItem = $transaction->items()->create([
                 'item_id' => $item->id,
                 'quantity' => $quantity,
+                'serials_json' => $serials,
             ]);
 
-            if ($item->isSerial()) {
+            if ($transaction->status === TransactionStatus::Approved && $item->isSerial()) {
                 $transaction->direction === TransactionDirection::In
                     ? $this->receiveSerials($transaction, $transactionItem, $item, $serials)
                     : $this->issueSerials($transaction, $transactionItem, $item, $serials);
@@ -252,36 +318,40 @@ class StockTransactionService
     {
         $transaction->load('items.serialNumbers');
 
-        foreach ($transaction->items as $line) {
-            foreach ($line->serialNumbers as $serial) {
-                if ($transaction->direction === TransactionDirection::Out) {
-                    $serial->update([
-                        'status' => SerialStatus::Available,
-                        'customer_id' => null,
-                        'stock_transaction_item_id' => null,
-                        'issued_at' => null,
-                    ]);
+        if ($transaction->status === TransactionStatus::Approved) {
+            foreach ($transaction->items as $line) {
+                foreach ($line->serialNumbers as $serial) {
+                    if ($transaction->direction === TransactionDirection::Out) {
+                        $serial->update([
+                            'status' => SerialStatus::Available,
+                            'customer_id' => null,
+                            'stock_transaction_item_id' => null,
+                            'issued_at' => null,
+                        ]);
 
-                    continue;
+                        continue;
+                    }
+
+                    if (! $serial->status->isAvailable()) {
+                        throw ValidationException::withMessages([
+                            'items' => "Transaksi tidak dapat diubah karena serial {$serial->serial_number} sudah keluar.",
+                        ]);
+                    }
+
+                    // Serial yang sudah ada sebelum transaksi ini (mis. dismantle) dipertahankan.
+                    if ($serial->received_at && $serial->received_at->lt($transaction->transaction_date)) {
+                        $serial->update(['stock_transaction_item_id' => null]);
+
+                        continue;
+                    }
+
+                    $serial->delete();
                 }
 
-                if (! $serial->status->isAvailable()) {
-                    throw ValidationException::withMessages([
-                        'items' => "Transaksi tidak dapat diubah karena serial {$serial->serial_number} sudah keluar.",
-                    ]);
-                }
-
-                // Serial yang sudah ada sebelum transaksi ini (mis. dismantle) dipertahankan.
-                if ($serial->received_at && $serial->received_at->lt($transaction->transaction_date)) {
-                    $serial->update(['stock_transaction_item_id' => null]);
-
-                    continue;
-                }
-
-                $serial->delete();
+                $line->delete();
             }
-
-            $line->delete();
+        } else {
+            $transaction->items()->delete();
         }
     }
 
@@ -369,6 +439,6 @@ class StockTransactionService
      */
     protected function defaultRelations(): array
     {
-        return ['customer:id,nama_pelanggan,cid,tipe_pelanggan', 'user:id,name', 'items.item', 'items.serialNumbers'];
+        return ['customer:id,nama_pelanggan,cid,tipe_pelanggan', 'user:id,name', 'approvedBy:id,name', 'items.item', 'items.serialNumbers'];
     }
 }

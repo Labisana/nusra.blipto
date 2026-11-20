@@ -30,6 +30,7 @@ class StockTransactionItem extends Model
         'stock_transaction_id',
         'item_id',
         'quantity',
+        'serials_json',
     ];
 
     /**
@@ -39,6 +40,7 @@ class StockTransactionItem extends Model
     {
         return [
             'quantity' => 'integer',
+            'serials_json' => 'array',
         ];
     }
 

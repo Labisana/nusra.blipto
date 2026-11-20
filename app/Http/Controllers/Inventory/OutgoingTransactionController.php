@@ -25,7 +25,7 @@ class OutgoingTransactionController extends Controller
     {
         $transactions = StockTransaction::query()
             ->direction(TransactionDirection::Out)
-            ->with(['customer', 'user', 'items.item', 'items.serialNumbers'])
+            ->with(['customer', 'user', 'approvedBy', 'items.item', 'items.serialNumbers'])
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
             ->limit(100)
@@ -57,10 +57,17 @@ class OutgoingTransactionController extends Controller
             $request->user(),
         );
 
-        return to_route('inventory.outgoing')->with('toast', [
-            'type' => 'success',
-            'message' => "Barang keluar {$transaction->reference} berhasil disimpan.",
-        ]);
+        $isPending = $transaction->isPending();
+        $message = $isPending
+            ? "Permintaan barang keluar {$transaction->reference} berhasil diajukan dan menunggu persetujuan SPV."
+            : "Barang keluar {$transaction->reference} berhasil disimpan.";
+
+        return to_route('inventory.outgoing')
+            ->with('toast', [
+                'type' => 'success',
+                'message' => $message,
+            ])
+            ->with('whatsapp_report', $transaction->toWhatsAppReport());
     }
 
     public function update(

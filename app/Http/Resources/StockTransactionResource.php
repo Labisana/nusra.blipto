@@ -21,6 +21,8 @@ class StockTransactionResource extends JsonResource
             'reference' => $this->reference,
             'direction' => $this->direction->value,
             'activity' => $this->activity->value,
+            'status' => $this->status->value,
+            'status_label' => $this->status->label(),
             'transaction_date' => $this->transaction_date->toDateString(),
             'note' => $this->note,
             'customer_id' => $this->customer_id,
@@ -34,6 +36,12 @@ class StockTransactionResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
             ] : null),
+            'approved_by' => $this->whenLoaded('approvedBy', fn (): ?array => $this->approvedBy ? [
+                'id' => $this->approvedBy->id,
+                'name' => $this->approvedBy->name,
+            ] : null),
+            'approved_at' => $this->approved_at?->toIso8601String(),
+            'rejection_note' => $this->rejection_note,
             'items' => $this->whenLoaded(
                 'items',
                 fn (): mixed => StockTransactionItemResource::collection($this->items),

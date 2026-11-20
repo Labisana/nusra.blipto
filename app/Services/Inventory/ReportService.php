@@ -61,6 +61,7 @@ class ReportService
             ->leftJoin('customers', 'customers.id', '=', 'transactions.customer_id')
             ->leftJoin('users', 'users.id', '=', 'transactions.user_id')
             ->where('transactions.direction', $direction->value)
+            ->where('transactions.status', 'approved')
             ->when(
                 filled($from),
                 fn (Builder $query): Builder => $query->whereDate('transactions.transaction_date', '>=', $from),

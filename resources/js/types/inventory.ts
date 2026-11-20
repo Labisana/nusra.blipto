@@ -2,6 +2,8 @@ export type ItemType = 'serial' | 'non-serial';
 
 export type TransactionDirection = 'in' | 'out';
 
+export type TransactionStatus = 'pending' | 'approved' | 'rejected';
+
 export type CustomerOption = {
     id: number;
     nama_pelanggan: string;
@@ -39,12 +41,41 @@ export type StockTransaction = {
     reference: string;
     direction: TransactionDirection;
     activity: string;
+    status: TransactionStatus;
+    status_label?: string;
     transaction_date: string;
     note: string | null;
     customer_id: number | null;
     customer: CustomerOption | null;
     user: { id: number; name: string } | null;
+    approved_by?: { id: number; name: string } | null;
+    approved_at?: string | null;
+    rejection_note?: string | null;
     items: TransactionLine[];
+    created_at?: string;
+};
+
+export type WhatsAppReportItem = {
+    name: string;
+    quantity: number;
+    unit: string;
+    serials: string[];
+};
+
+export type WhatsAppReport = {
+    id: number;
+    reference: string;
+    direction: 'in' | 'out';
+    direction_label: string;
+    activity: string;
+    date: string;
+    user_name: string;
+    customer_name?: string | null;
+    customer_type?: string | null;
+    status: TransactionStatus;
+    status_label: string;
+    note?: string | null;
+    items: WhatsAppReportItem[];
 };
 
 export type SerialRow = {

@@ -5,6 +5,7 @@ import {
     ArrowRight,
     ArrowUpFromLine,
     Boxes,
+    Clock,
     FileSpreadsheet,
     Package,
     Plus,
@@ -36,6 +37,7 @@ const props = defineProps<{
         outgoing_this_month: number;
         total_remaining: number;
         active_customers: number;
+        pending_approvals?: number;
     };
     recentIncoming: ReportRow[];
     recentOutgoing: ReportRow[];
@@ -171,6 +173,44 @@ const stats = computed(() => [
                         <span>Laporan</span>
                     </Link>
                 </div>
+            </div>
+        </div>
+
+        <!-- Pending Approval Alert for SPV / Admin -->
+        <div
+            v-if="canManage && (props.stats.pending_approvals || 0) > 0"
+            class="flex flex-col items-start justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 shadow-xs sm:flex-row sm:items-center"
+        >
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                >
+                    <Clock class="size-5" />
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-foreground">
+                        {{ props.stats.pending_approvals }} Permintaan Transaksi
+                        Menunggu Persetujuan
+                    </h3>
+                    <p class="text-xs text-muted-foreground">
+                        Inputan dari tim teknis memerlukan verifikasi &
+                        persetujuan SPV sebelum memutasi stok gudang.
+                    </p>
+                </div>
+            </div>
+            <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+                <Link
+                    href="/barang-masuk"
+                    class="rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-all hover:border-[#fb4f00] active:scale-95"
+                >
+                    Barang Masuk
+                </Link>
+                <Link
+                    href="/barang-keluar"
+                    class="rounded-xl bg-gradient-to-r from-[#fb4f00] to-[#ff6b26] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:brightness-105 active:scale-95"
+                >
+                    Barang Keluar
+                </Link>
             </div>
         </div>
 

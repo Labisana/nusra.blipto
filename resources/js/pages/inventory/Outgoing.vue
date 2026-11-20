@@ -1,13 +1,25 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { Plus, Search, Trash2, X } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import {
+    Check,
+    CheckCircle2,
+    Clock,
+    MessageCircle,
+    Plus,
+    Search,
+    Trash2,
+    X,
+    XCircle,
+} from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
+import WhatsAppReportModal from '@/components/WhatsAppReportModal.vue';
 import { useRole } from '@/composables/useRole';
 import type {
     CustomerOption,
     ItemOption,
     SelectOption,
     StockTransaction,
+    WhatsAppReport,
 } from '@/types/inventory';
 
 defineOptions({
@@ -30,6 +42,75 @@ const { roleLabel, canManage } = useRole();
 const showForm = ref(false);
 const editingId = ref<number | null>(null);
 const search = ref('');
+const showWhatsAppModal = ref(false);
+const activeWhatsAppReport = ref<WhatsAppReport | null>(null);
+
+const page = usePage();
+watch(
+    () => (page.props.flash as any)?.whatsapp_report,
+    (report) => {
+        if (report) {
+            activeWhatsAppReport.value = report;
+            showWhatsAppModal.value = true;
+        }
+    },
+    { immediate: true },
+);
+
+function openWhatsAppReport(transaction: StockTransaction) {
+    activeWhatsAppReport.value = {
+        id: transaction.id,
+        reference: transaction.reference,
+        direction: 'out',
+        direction_label: 'BARANG KELUAR',
+        activity: transaction.activity,
+        date: transaction.transaction_date,
+        user_name: transaction.user?.name ?? 'Teknisi',
+        customer_name: transaction.customer?.nama_pelanggan ?? null,
+        customer_type: transaction.customer?.tipe_pelanggan ?? null,
+        status: transaction.status,
+        status_label:
+            transaction.status_label ??
+            (transaction.status === 'pending'
+                ? 'Menunggu SPV'
+                : transaction.status === 'approved'
+                  ? 'Disetujui'
+                  : 'Ditolak'),
+        note: transaction.note,
+        items: transaction.items.map((line) => ({
+            name: line.item_name,
+            quantity: line.quantity,
+            unit: 'unit',
+            serials: line.serials,
+        })),
+    };
+    showWhatsAppModal.value = true;
+}
+
+function approveTransaction(transactionId: number) {
+    if (
+        !confirm(
+            'Setujui permintaan barang keluar ini? Stok gudang akan resmi dikurangkan.',
+        )
+    ) {
+        return;
+    }
+    router.post(
+        `/transaksi/${transactionId}/setujui`,
+        {},
+        { preserveScroll: true },
+    );
+}
+
+function rejectTransaction(transactionId: number) {
+    const reason = prompt('Masukkan alasan penolakan permintaan ini:');
+    if (reason === null) return;
+    router.post(
+        `/transaksi/${transactionId}/tolak`,
+        { reason },
+        { preserveScroll: true },
+    );
+}
 
 type Line = {
     item_id: number | '';
@@ -65,6 +146,17 @@ const rows = computed(() =>
         transaction.items.map((line) => ({
             id: `${transaction.id}-${line.id}`,
             transaction_id: transaction.id,
+            raw_transaction: transaction,
+            status: transaction.status,
+            status_label:
+                transaction.status_label ??
+                (transaction.status === 'pending'
+                    ? 'Menunggu SPV'
+                    : transaction.status === 'approved'
+                      ? 'Disetujui'
+                      : 'Ditolak'),
+            approved_by: transaction.approved_by?.name ?? null,
+            rejection_note: transaction.rejection_note ?? null,
             date: transaction.transaction_date,
             ref: transaction.reference,
             customer: transaction.customer?.nama_pelanggan ?? '-',
@@ -282,6 +374,7 @@ function lineError(
                         <tr>
                             <th class="px-4 py-3">Tanggal</th>
                             <th class="px-4 py-3">No. Ref</th>
+                            <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3">Pelanggan Tujuan</th>
                             <th class="px-4 py-3">Activity</th>
                             <th class="px-4 py-3">Nama Barang</th>
@@ -307,6 +400,39 @@ function lineError(
                                 class="px-4 py-3 font-mono font-semibold whitespace-nowrap text-foreground"
                             >
                                 {{ r.ref }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span
+                                    v-if="r.status === 'pending'"
+                                    class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
+                                >
+                                    <Clock class="size-3" />
+                                    Menunggu SPV
+                                </span>
+                                <span
+                                    v-else-if="r.status === 'approved'"
+                                    class="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400"
+                                    :title="
+                                        r.approved_by
+                                            ? 'Disetujui oleh: ' + r.approved_by
+                                            : 'Disetujui'
+                                    "
+                                >
+                                    <CheckCircle2 class="size-3" />
+                                    Disetujui
+                                </span>
+                                <span
+                                    v-else
+                                    class="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-600 dark:text-rose-400"
+                                    :title="
+                                        r.rejection_note
+                                            ? 'Alasan: ' + r.rejection_note
+                                            : 'Ditolak'
+                                    "
+                                >
+                                    <XCircle class="size-3" />
+                                    Ditolak
+                                </span>
                             </td>
                             <td
                                 class="min-w-[200px] px-4 py-3 font-semibold text-foreground"
@@ -351,7 +477,55 @@ function lineError(
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-right whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1">
+                                <div class="inline-flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 transition-colors hover:bg-emerald-500/20 active:scale-95 dark:text-emerald-400"
+                                        title="Format Report WhatsApp"
+                                        @click="
+                                            openWhatsAppReport(
+                                                r.raw_transaction,
+                                            )
+                                        "
+                                    >
+                                        <MessageCircle class="size-3.5" />
+                                        <span>WA</span>
+                                    </button>
+
+                                    <!-- SPV Quick Approval / Reject -->
+                                    <template
+                                        v-if="
+                                            canManage && r.status === 'pending'
+                                        "
+                                    >
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-2xs transition-all hover:bg-emerald-500 active:scale-95"
+                                            title="Setujui Permintaan"
+                                            @click="
+                                                approveTransaction(
+                                                    r.transaction_id,
+                                                )
+                                            "
+                                        >
+                                            <Check class="size-3.5" />
+                                            <span>Setujui</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs font-semibold text-rose-600 transition-all hover:bg-rose-500/20 active:scale-95 dark:text-rose-400"
+                                            title="Tolak Permintaan"
+                                            @click="
+                                                rejectTransaction(
+                                                    r.transaction_id,
+                                                )
+                                            "
+                                        >
+                                            <X class="size-3.5" />
+                                            <span>Tolak</span>
+                                        </button>
+                                    </template>
+
                                     <button
                                         class="rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium transition-colors hover:border-[#fb4f00]/40 hover:text-[#fb4f00] disabled:opacity-40"
                                         :disabled="!canManage"
@@ -400,6 +574,28 @@ function lineError(
                                 >
                                     {{ r.activity }}
                                 </span>
+                                <!-- Status Badge -->
+                                <span
+                                    v-if="r.status === 'pending'"
+                                    class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
+                                >
+                                    <Clock class="size-3" />
+                                    Menunggu SPV
+                                </span>
+                                <span
+                                    v-else-if="r.status === 'approved'"
+                                    class="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400"
+                                >
+                                    <CheckCircle2 class="size-3" />
+                                    Disetujui
+                                </span>
+                                <span
+                                    v-else
+                                    class="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-600 dark:text-rose-400"
+                                >
+                                    <XCircle class="size-3" />
+                                    Ditolak
+                                </span>
                             </div>
                             <p class="mt-0.5 text-[11px] text-muted-foreground">
                                 {{ r.date }} · Oleh: {{ r.user }}
@@ -436,22 +632,55 @@ function lineError(
                         </p>
                     </div>
 
-                    <div v-if="canManage" class="flex items-center gap-2 pt-1">
+                    <!-- SPV Quick Approval on Mobile -->
+                    <div
+                        v-if="canManage && r.status === 'pending'"
+                        class="flex items-center gap-2 pt-1"
+                    >
                         <button
                             type="button"
-                            class="inline-flex min-h-[42px] flex-1 items-center justify-center rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-all hover:border-[#fb4f00]/40 hover:text-[#fb4f00] active:scale-95"
-                            @click="openEditById(r.transaction_id)"
+                            class="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-2xs transition-all hover:bg-emerald-500 active:scale-95"
+                            @click="approveTransaction(r.transaction_id)"
                         >
-                            Edit Transaksi
+                            <Check class="size-4" />
+                            <span>Setujui Permintaan</span>
                         </button>
                         <button
                             type="button"
-                            class="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 text-destructive transition-all hover:bg-destructive/15 active:scale-95"
-                            @click="destroy(r.transaction_id)"
-                            aria-label="Hapus"
+                            class="inline-flex min-h-[40px] items-center justify-center gap-1 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-600 transition-all hover:bg-rose-500/20 active:scale-95 dark:text-rose-400"
+                            @click="rejectTransaction(r.transaction_id)"
                         >
-                            <Trash2 class="size-4" />
+                            <X class="size-4" />
+                            <span>Tolak</span>
                         </button>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1">
+                        <button
+                            type="button"
+                            class="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-600 transition-all hover:bg-emerald-500/20 active:scale-95 dark:text-emerald-400"
+                            @click="openWhatsAppReport(r.raw_transaction)"
+                        >
+                            <MessageCircle class="size-4" />
+                            <span>Salin Format WA</span>
+                        </button>
+                        <template v-if="canManage">
+                            <button
+                                type="button"
+                                class="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-all hover:border-[#fb4f00]/40 hover:text-[#fb4f00] active:scale-95"
+                                @click="openEditById(r.transaction_id)"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 text-destructive transition-all hover:bg-destructive/15 active:scale-95"
+                                @click="destroy(r.transaction_id)"
+                                aria-label="Hapus"
+                            >
+                                <Trash2 class="size-4" />
+                            </button>
+                        </template>
                     </div>
                 </div>
                 <div
@@ -899,4 +1128,11 @@ function lineError(
             </div>
         </div>
     </Teleport>
+
+    <!-- WhatsApp Report Confirmation Modal -->
+    <WhatsAppReportModal
+        :show="showWhatsAppModal"
+        :report="activeWhatsAppReport"
+        @close="showWhatsAppModal = false"
+    />
 </template>

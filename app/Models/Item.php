@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ItemType;
 use App\Enums\SerialStatus;
 use App\Enums\TransactionDirection;
+use App\Enums\TransactionStatus;
 use Database\Factories\ItemFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -111,14 +112,16 @@ class Item extends Model
             ->withSum(
                 ['transactionItems as stock_in' => fn (Builder $query): Builder => $query->whereHas(
                     'transaction',
-                    fn (Builder $query): Builder => $query->where('direction', TransactionDirection::In),
+                    fn (Builder $query): Builder => $query->where('direction', TransactionDirection::In)
+                        ->where('status', TransactionStatus::Approved),
                 )],
                 'quantity',
             )
             ->withSum(
                 ['transactionItems as stock_out' => fn (Builder $query): Builder => $query->whereHas(
                     'transaction',
-                    fn (Builder $query): Builder => $query->where('direction', TransactionDirection::Out),
+                    fn (Builder $query): Builder => $query->where('direction', TransactionDirection::Out)
+                        ->where('status', TransactionStatus::Approved),
                 )],
                 'quantity',
             );
