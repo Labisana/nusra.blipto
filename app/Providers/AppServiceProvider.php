@@ -54,6 +54,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('view-reports', fn (User $user): bool => $user->canViewReports());
 
-        Gate::define('manage-users', fn (User $user): bool => $user->isSpv());
+        Gate::define('manage-users', fn (User $user): bool => $user->canManageUsers());
     }
 }

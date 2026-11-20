@@ -11,6 +11,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $users = [
+            ['name' => 'Manager Operasional', 'email' => 'manager@nusra.test', 'role' => Role::Manager],
             ['name' => 'Supervisor Gudang', 'email' => 'spv@nusra.test', 'role' => Role::Spv],
             ['name' => 'Admin Gudang', 'email' => 'admin@nusra.test', 'role' => Role::Admin],
             ['name' => 'Teknisi Lapangan', 'email' => 'teknisi@nusra.test', 'role' => Role::Teknisi],

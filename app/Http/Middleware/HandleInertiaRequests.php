@@ -50,7 +50,7 @@ class HandleInertiaRequests extends Middleware
                     'role' => $user->role->value,
                     'can_manage' => $user->canManage(),
                     'can_view_reports' => $user->canViewReports(),
-                    'can_manage_users' => $user->isSpv(),
+                    'can_manage_users' => $user->canManageUsers(),
                 ] : null,
             ],
             'flash' => [

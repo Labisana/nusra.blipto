@@ -17,7 +17,7 @@ class TransactionApprovalController extends Controller
 {
     public function index(Request $request): Response
     {
-        abort_unless($request->user()->canManage(), 403, 'Hanya SPV/Admin yang dapat mengakses halaman persetujuan.');
+        abort_unless($request->user()->canManage(), 403, 'Hanya Manager/SPV/Admin yang dapat mengakses halaman persetujuan.');
 
         $pending = StockTransaction::query()
             ->pending()
@@ -59,7 +59,7 @@ class TransactionApprovalController extends Controller
         StockTransactionService $service,
         Request $request,
     ): RedirectResponse {
-        abort_unless($request->user()->canManage(), 403, 'Hanya SPV/Admin yang dapat menyetujui permintaan.');
+        abort_unless($request->user()->canManage(), 403, 'Hanya Manager/SPV/Admin yang dapat menyetujui permintaan.');
 
         $service->approve($transaction, $request->user());
 
@@ -74,7 +74,7 @@ class TransactionApprovalController extends Controller
         StockTransactionService $service,
         Request $request,
     ): RedirectResponse {
-        abort_unless($request->user()->canManage(), 403, 'Hanya SPV/Admin yang dapat menolak permintaan.');
+        abort_unless($request->user()->canManage(), 403, 'Hanya Manager/SPV/Admin yang dapat menolak permintaan.');
 
         $request->validate([
             'reason' => 'nullable|string|max:500',

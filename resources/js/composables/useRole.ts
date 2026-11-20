@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-export type AppRole = 'spv' | 'admin' | 'teknisi';
+export type AppRole = 'manager' | 'spv' | 'admin' | 'teknisi';
 
 type SharedProps = {
     auth: {
@@ -18,6 +18,7 @@ type SharedProps = {
 };
 
 const roleLabels: Record<AppRole, string> = {
+    manager: 'Manager (Full Akses)',
     spv: 'SPV (Full Akses)',
     admin: 'Admin (Kelola Data)',
     teknisi: 'Teknisi (Input Transaksi)',
@@ -30,6 +31,7 @@ export function useRole() {
     const roleLabel = computed(() => roleLabels[role.value]);
     const isTeknisi = computed(() => role.value === 'teknisi');
     const isSpv = computed(() => role.value === 'spv');
+    const isManager = computed(() => role.value === 'manager');
     const canManage = computed(
         () => user.value?.can_manage ?? role.value !== 'teknisi',
     );
@@ -37,7 +39,9 @@ export function useRole() {
         () => user.value?.can_view_reports ?? role.value !== 'teknisi',
     );
     const canManageUsers = computed(
-        () => user.value?.can_manage_users ?? role.value === 'spv',
+        () =>
+            user.value?.can_manage_users ??
+            (role.value === 'manager' || role.value === 'spv'),
     );
 
     return {
@@ -46,6 +50,7 @@ export function useRole() {
         user,
         isTeknisi,
         isSpv,
+        isManager,
         canManage,
         canViewReports,
         canManageUsers,

@@ -56,7 +56,7 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        if ($user->is($request->user()) && $data['role'] !== Role::Spv->value) {
+        if ($user->is($request->user()) && $data['role'] !== $user->role->value) {
             return back()->with('toast', [
                 'type' => 'error',
                 'message' => 'Anda tidak dapat mengubah peran akun sendiri.',
@@ -86,7 +86,7 @@ class UserController extends Controller
         if (! $request->user()->can('delete', $user)) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => $request->user()->isSpv()
+                'message' => $request->user()->canManageUsers()
                     ? 'Anda tidak dapat menghapus akun sendiri.'
                     : 'Anda tidak memiliki akses untuk menghapus pengguna.',
             ]);

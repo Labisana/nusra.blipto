@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum Role: string
 {
+    case Manager = 'manager';
     case Spv = 'spv';
     case Admin = 'admin';
     case Teknisi = 'teknisi';
@@ -11,6 +12,7 @@ enum Role: string
     public function label(): string
     {
         return match ($this) {
+            self::Manager => 'Manager',
             self::Spv => 'SPV',
             self::Admin => 'Admin',
             self::Teknisi => 'Teknisi',
@@ -18,7 +20,7 @@ enum Role: string
     }
 
     /**
-     * SPV dan Admin dapat menambah, mengubah, dan menghapus data master.
+     * Manager, SPV, dan Admin dapat menambah, mengubah, dan menghapus data master serta menyetujui transaksi.
      */
     public function canManage(): bool
     {
@@ -31,6 +33,14 @@ enum Role: string
     public function canViewReports(): bool
     {
         return $this !== self::Teknisi;
+    }
+
+    /**
+     * Khusus Manager dan SPV yang dapat mengelola akun pengguna.
+     */
+    public function canManageUsers(): bool
+    {
+        return $this === self::Manager || $this === self::Spv;
     }
 
     /**

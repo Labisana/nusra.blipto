@@ -4,7 +4,7 @@ export type User = {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
-    role?: 'spv' | 'admin' | 'teknisi';
+    role?: 'manager' | 'spv' | 'admin' | 'teknisi';
     can_manage?: boolean;
     can_view_reports?: boolean;
     can_manage_users?: boolean;

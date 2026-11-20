@@ -27,6 +27,8 @@ const showAvatar = computed(
 
 const roleBadgeColor = computed(() => {
     switch (role.value) {
+        case 'manager':
+            return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800';
         case 'spv':
             return 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800';
         case 'admin':

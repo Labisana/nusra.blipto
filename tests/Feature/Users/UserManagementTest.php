@@ -17,10 +17,24 @@ test('spv can see the user management page with users and roles', function () {
         ->assertInertia(fn ($page) => $page
             ->component('users/Index')
             ->has('users', 2)
-            ->has('roles', 3)
-            ->where('roles.0.value', 'spv')
-            ->where('roles.2.value', 'teknisi')
+            ->has('roles', 4)
+            ->where('roles.0.value', 'manager')
+            ->where('roles.1.value', 'spv')
+            ->where('roles.3.value', 'teknisi')
             ->where('filters.q', ''));
+});
+
+test('manager can also see and manage users', function () {
+    $manager = User::factory()->manager()->create();
+    User::factory()->admin()->create();
+
+    $this->actingAs($manager)
+        ->get(route('users.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('users/Index')
+            ->has('users', 2)
+            ->has('roles', 4));
 });
 
 test('admin and teknisi cannot access user management', function () {

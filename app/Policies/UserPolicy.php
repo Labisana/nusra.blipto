@@ -7,26 +7,26 @@ use App\Models\User;
 class UserPolicy
 {
     /**
-     * Hanya SPV yang boleh mengelola akun pengguna.
+     * Hanya SPV dan Manager yang boleh mengelola akun pengguna.
      */
     public function viewAny(User $user): bool
     {
-        return $user->isSpv();
+        return $user->canManageUsers();
     }
 
     public function view(User $user, User $target): bool
     {
-        return $user->isSpv();
+        return $user->canManageUsers();
     }
 
     public function create(User $user): bool
     {
-        return $user->isSpv();
+        return $user->canManageUsers();
     }
 
     public function update(User $user, User $target): bool
     {
-        return $user->isSpv();
+        return $user->canManageUsers();
     }
 
     /**
@@ -34,6 +34,6 @@ class UserPolicy
      */
     public function delete(User $user, User $target): bool
     {
-        return $user->isSpv() && $user->id !== $target->id;
+        return $user->canManageUsers() && $user->id !== $target->id;
     }
 }

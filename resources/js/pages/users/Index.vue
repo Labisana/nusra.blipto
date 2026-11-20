@@ -78,8 +78,10 @@ const roleCounts = computed(() =>
 
 function roleBadgeClass(role: string): string {
     switch (role) {
+        case 'manager':
+            return 'bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/20 font-bold';
         case 'spv':
-            return 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/20';
+            return 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/20 font-bold';
         case 'admin':
             return 'bg-[#fb4f00]/15 text-[#fb4f00] dark:text-[#ff6b26] border border-[#fb4f00]/20 font-bold';
         default:
@@ -201,7 +203,7 @@ function destroy(row: UserRow) {
             v-if="!canManageUsers"
             class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-300"
         >
-            Hanya SPV yang memiliki otoritas untuk menambah, mengubah, atau
+            Hanya Manager atau SPV yang memiliki otoritas untuk menambah, mengubah, atau
             menghapus akun pengguna.
         </div>
 

@@ -63,6 +63,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->hasMany(StockTransaction::class);
     }
 
+    public function isManager(): bool
+    {
+        return $this->role === Role::Manager;
+    }
+
     public function isSpv(): bool
     {
         return $this->role === Role::Spv;
@@ -79,7 +84,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
-     * SPV dan Admin dapat mengelola data master serta mengubah transaksi.
+     * Manager, SPV, dan Admin dapat mengelola data master serta mengubah/menyetujui transaksi.
      */
     public function canManage(): bool
     {
@@ -89,6 +94,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function canViewReports(): bool
     {
         return $this->role->canViewReports();
+    }
+
+    public function canManageUsers(): bool
+    {
+        return $this->role->canManageUsers();
     }
 
     /**

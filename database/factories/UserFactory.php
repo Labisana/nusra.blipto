@@ -48,6 +48,11 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function manager(): static
+    {
+        return $this->state(fn (): array => ['role' => Role::Manager]);
+    }
+
     public function spv(): static
     {
         return $this->state(fn (): array => ['role' => Role::Spv]);
