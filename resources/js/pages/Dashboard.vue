@@ -225,263 +225,296 @@ const stats = computed(() => [
             </Link>
         </div>
 
-        <!-- Main Content Grid: Transactions & Alerts -->
-        <div class="grid gap-6 xl:grid-cols-3">
-            <!-- Recent Incoming Items -->
+        <!-- 1. Barang Masuk Terbaru (Full-Width Card) -->
+        <div
+            class="w-full min-w-0 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:border-border"
+        >
             <div
-                class="rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:border-border xl:col-span-2"
+                class="flex items-center justify-between border-b border-border/70 px-4 py-3.5 sm:px-5 sm:py-4"
             >
-                <div
-                    class="flex items-center justify-between border-b border-border/70 px-5 py-4"
+                <div class="flex min-w-0 items-center gap-2.5">
+                    <div
+                        class="shrink-0 rounded-lg bg-emerald-500/10 p-1.5 text-emerald-600 dark:text-emerald-400"
+                    >
+                        <ArrowDownToLine class="size-4" />
+                    </div>
+                    <div class="min-w-0">
+                        <h2
+                            class="truncate text-sm font-semibold text-foreground"
+                        >
+                            Barang Masuk Terbaru
+                        </h2>
+                        <p class="truncate text-xs text-muted-foreground">
+                            Penerimaan stok perangkat & komponen
+                        </p>
+                    </div>
+                </div>
+                <Link
+                    href="/barang-masuk"
+                    class="group ml-2 inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#fb4f00] hover:underline"
                 >
-                    <div class="flex items-center gap-2.5">
-                        <div
-                            class="rounded-lg bg-emerald-500/10 p-1.5 text-emerald-600 dark:text-emerald-400"
-                        >
-                            <ArrowDownToLine class="size-4" />
-                        </div>
-                        <div>
-                            <h2 class="text-sm font-semibold text-foreground">
-                                Barang Masuk Terbaru
-                            </h2>
-                            <p class="text-xs text-muted-foreground">
-                                Penerimaan stok perangkat & komponen
-                            </p>
-                        </div>
-                    </div>
-                    <Link
-                        href="/barang-masuk"
-                        class="group inline-flex items-center gap-1 text-xs font-semibold text-[#fb4f00] hover:underline"
-                    >
-                        <span>Lihat Semua</span>
-                        <ArrowRight
-                            class="size-3.5 transition-transform group-hover:translate-x-0.5"
-                        />
-                    </Link>
-                </div>
-                <!-- Desktop Table View -->
-                <div class="hidden overflow-x-auto md:block">
-                    <table class="w-full text-left text-sm">
-                        <thead
-                            class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                        >
-                            <tr>
-                                <th class="px-5 py-3">Tanggal</th>
-                                <th class="px-5 py-3">Perangkat / Barang</th>
-                                <th class="px-5 py-3">Tipe</th>
-                                <th class="px-5 py-3 text-right">Jumlah</th>
-                                <th class="px-5 py-3">No. Referensi</th>
-                                <th class="px-5 py-3">Petugas</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border/50 text-xs">
-                            <tr
-                                v-for="r in recentIncoming"
-                                :key="r.id"
-                                class="transition-colors hover:bg-[#fb4f00]/[0.03] dark:hover:bg-[#fb4f00]/[0.05]"
-                            >
-                                <td
-                                    class="px-5 py-3 font-mono whitespace-nowrap text-muted-foreground"
-                                >
-                                    {{ r.date }}
-                                </td>
-                                <td
-                                    class="min-w-[200px] px-5 py-3 font-medium text-foreground"
-                                >
-                                    {{ r.item }}
-                                </td>
-                                <td class="px-5 py-3">
-                                    <span
-                                        class="inline-flex rounded-full border border-border/80 bg-background px-2 py-0.5 text-[10px] font-medium"
-                                    >
-                                        {{ r.type }}
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-5 py-3 text-right font-bold whitespace-nowrap text-emerald-600 dark:text-emerald-400"
-                                >
-                                    +{{ r.qty }}
-                                </td>
-                                <td
-                                    class="px-5 py-3 font-mono whitespace-nowrap text-muted-foreground"
-                                >
-                                    {{ r.ref }}
-                                </td>
-                                <td class="px-5 py-3 whitespace-nowrap">
-                                    <span
-                                        class="inline-flex items-center gap-1 rounded bg-muted/70 px-2 py-0.5 font-medium text-foreground"
-                                    >
-                                        {{ r.user }}
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="!recentIncoming.length">
-                                <td
-                                    colspan="6"
-                                    class="px-5 py-8 text-center text-muted-foreground"
-                                >
-                                    <Package
-                                        class="mx-auto mb-2 size-8 text-muted-foreground/40"
-                                    />
-                                    Belum ada transaksi barang masuk.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Mobile Card View -->
-                <div class="block divide-y divide-border/60 md:hidden">
-                    <div
-                        v-for="r in recentIncoming"
-                        :key="r.id"
-                        class="space-y-2 p-4 transition-colors active:bg-muted/30"
-                    >
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
-                                <p class="text-xs font-bold text-foreground">
-                                    {{ r.item }}
-                                </p>
-                                <p class="text-[11px] text-muted-foreground">
-                                    {{ r.date }} · Ref: {{ r.ref }}
-                                </p>
-                            </div>
-                            <span
-                                class="inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400"
-                            >
-                                +{{ r.qty }}
-                            </span>
-                        </div>
-                        <div
-                            class="flex items-center justify-between text-[11px] text-muted-foreground"
-                        >
-                            <span>Tipe: {{ r.type }}</span>
-                            <span>Petugas: {{ r.user }}</span>
-                        </div>
-                    </div>
-                    <div
-                        v-if="!recentIncoming.length"
-                        class="p-6 text-center text-xs text-muted-foreground"
-                    >
-                        Belum ada transaksi barang masuk.
-                    </div>
-                </div>
+                    <span>Lihat Semua</span>
+                    <ArrowRight
+                        class="size-3.5 transition-transform group-hover:translate-x-0.5"
+                    />
+                </Link>
             </div>
 
-            <!-- Low Stock Alert Card -->
-            <div
-                class="flex flex-col rounded-2xl border border-border/80 bg-card shadow-xs"
-            >
-                <div
-                    class="flex items-center justify-between border-b border-border/70 px-5 py-4"
-                >
-                    <div class="flex items-center gap-2.5">
-                        <div
-                            class="rounded-lg bg-amber-500/10 p-1.5 text-amber-500"
+            <!-- Desktop Table View -->
+            <div class="hidden overflow-x-auto md:block">
+                <table class="w-full text-left text-sm">
+                    <thead
+                        class="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <tr>
+                            <th class="px-5 py-3">Tanggal</th>
+                            <th class="px-5 py-3">Perangkat / Barang</th>
+                            <th class="px-5 py-3">Tipe</th>
+                            <th class="px-5 py-3 text-right">Jumlah</th>
+                            <th class="px-5 py-3">No. Referensi</th>
+                            <th class="px-5 py-3">Petugas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border/50 text-xs">
+                        <tr
+                            v-for="r in recentIncoming"
+                            :key="r.id"
+                            class="transition-colors hover:bg-[#fb4f00]/[0.03] dark:hover:bg-[#fb4f00]/[0.05]"
                         >
-                            <TriangleAlert class="size-4" />
-                        </div>
-                        <div>
-                            <h2 class="text-sm font-semibold text-foreground">
-                                Peringatan Stok Menipis
-                            </h2>
-                            <p class="text-xs text-muted-foreground">
-                                Item di bawah batas minimum
+                            <td
+                                class="px-5 py-3 font-mono whitespace-nowrap text-muted-foreground"
+                            >
+                                {{ r.date }}
+                            </td>
+                            <td
+                                class="min-w-[200px] px-5 py-3 font-medium text-foreground"
+                            >
+                                {{ r.item }}
+                            </td>
+                            <td class="px-5 py-3">
+                                <span
+                                    class="inline-flex rounded-full border border-border/80 bg-background px-2 py-0.5 text-[10px] font-medium"
+                                >
+                                    {{ r.type }}
+                                </span>
+                            </td>
+                            <td
+                                class="px-5 py-3 text-right font-bold whitespace-nowrap text-emerald-600 dark:text-emerald-400"
+                            >
+                                +{{ r.qty }}
+                            </td>
+                            <td
+                                class="px-5 py-3 font-mono whitespace-nowrap text-muted-foreground"
+                            >
+                                {{ r.ref }}
+                            </td>
+                            <td class="px-5 py-3 whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center gap-1 rounded bg-muted/70 px-2 py-0.5 font-medium text-foreground"
+                                >
+                                    {{ r.user }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr v-if="!recentIncoming.length">
+                            <td
+                                colspan="6"
+                                class="px-5 py-8 text-center text-muted-foreground"
+                            >
+                                <Package
+                                    class="mx-auto mb-2 size-8 text-muted-foreground/40"
+                                />
+                                Belum ada transaksi barang masuk.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View (Styled identically to Barang Keluar) -->
+            <div class="block divide-y divide-border/60 md:hidden">
+                <div
+                    v-for="r in recentIncoming"
+                    :key="r.id"
+                    class="space-y-2.5 p-4 transition-colors active:bg-muted/30"
+                >
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                            <p
+                                class="text-xs font-bold break-words text-foreground"
+                            >
+                                {{ r.item }}
+                            </p>
+                            <p class="mt-0.5 text-[11px] text-muted-foreground">
+                                {{ r.date }} · Ref:
+                                <span class="font-mono font-medium">{{
+                                    r.ref
+                                }}</span>
                             </p>
                         </div>
-                    </div>
-                    <span
-                        v-if="lowStock.length"
-                        class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
-                    >
-                        {{ lowStock.length }} Item
-                    </span>
-                </div>
-                <div class="max-h-[360px] flex-1 overflow-y-auto p-2">
-                    <ul class="space-y-1.5">
-                        <li
-                            v-for="l in lowStock"
-                            :key="l.item"
-                            class="group flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/50 p-3 transition-colors hover:border-amber-500/40 hover:bg-amber-500/[0.04]"
+                        <span
+                            class="inline-flex shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400"
                         >
-                            <div class="min-w-0 flex-1">
-                                <p
-                                    class="truncate text-xs font-semibold text-foreground"
-                                >
-                                    {{ l.item }}
-                                </p>
-                                <p
-                                    class="mt-0.5 text-[11px] text-muted-foreground"
-                                >
-                                    {{ l.type }} · Batas min:
-                                    <span class="font-medium text-foreground">{{
-                                        l.min
-                                    }}</span>
-                                </p>
-                            </div>
-                            <div class="shrink-0 text-right">
-                                <span
-                                    class="inline-block rounded-lg bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-600 dark:text-amber-400"
-                                >
-                                    Sisa {{ l.stock }}
-                                </span>
-                            </div>
-                        </li>
-                    </ul>
+                            +{{ r.qty }}
+                        </span>
+                    </div>
                     <div
-                        v-if="!lowStock.length"
-                        class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground"
+                        class="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground"
                     >
-                        <div
-                            class="mb-2 rounded-full bg-emerald-500/10 p-3 text-emerald-500"
+                        <span
+                            class="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-medium"
                         >
-                            <Package class="size-6" />
-                        </div>
-                        <p class="text-xs font-medium text-foreground">
-                            Stok Gudang Aman
-                        </p>
-                        <p class="mt-0.5 text-[11px] text-muted-foreground">
-                            Semua item berada di atas kuota minimum.
-                        </p>
+                            {{ r.type }}
+                        </span>
+                        <span>Petugas: {{ r.user }}</span>
                     </div>
                 </div>
-                <div class="border-t border-border/60 bg-muted/20 p-3">
-                    <Link
-                        href="/stok"
-                        class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-foreground transition-all hover:border-[#fb4f00]/40 hover:text-[#fb4f00]"
-                    >
-                        <span>Kelola Master Stok</span>
-                        <ArrowRight class="size-3.5" />
-                    </Link>
+                <div
+                    v-if="!recentIncoming.length"
+                    class="p-6 text-center text-xs text-muted-foreground"
+                >
+                    Belum ada transaksi barang masuk.
                 </div>
             </div>
         </div>
 
-        <!-- Recent Outgoing Transactions -->
+        <!-- 2. Peringatan Stok Menipis (Full-Width Card matching Barang Keluar) -->
         <div
-            class="rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:border-border"
+            class="w-full min-w-0 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:border-border"
         >
             <div
-                class="flex items-center justify-between border-b border-border/70 px-5 py-4"
+                class="flex items-center justify-between border-b border-border/70 px-4 py-3.5 sm:px-5 sm:py-4"
             >
-                <div class="flex items-center gap-2.5">
+                <div class="flex min-w-0 items-center gap-2.5">
                     <div
-                        class="rounded-lg bg-[#fb4f00]/10 p-1.5 text-[#fb4f00]"
+                        class="shrink-0 rounded-lg bg-amber-500/10 p-1.5 text-amber-500"
+                    >
+                        <TriangleAlert class="size-4" />
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2
+                                class="truncate text-sm font-semibold text-foreground"
+                            >
+                                Peringatan Stok Menipis
+                            </h2>
+                            <span
+                                v-if="lowStock.length"
+                                class="shrink-0 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400"
+                            >
+                                {{ lowStock.length }} Item
+                            </span>
+                        </div>
+                        <p class="truncate text-xs text-muted-foreground">
+                            Item dengan kuota mendekati atau di bawah batas
+                            minimum
+                        </p>
+                    </div>
+                </div>
+                <Link
+                    href="/stok"
+                    class="group ml-2 inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600 hover:underline dark:text-amber-400"
+                >
+                    <span>Lihat Stok</span>
+                    <ArrowRight
+                        class="size-3.5 transition-transform group-hover:translate-x-0.5"
+                    />
+                </Link>
+            </div>
+
+            <!-- Content Area: Responsive Grid of Cards -->
+            <div v-if="lowStock.length" class="p-3 sm:p-4">
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div
+                        v-for="l in lowStock"
+                        :key="l.item"
+                        class="group flex flex-col justify-between rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-3.5 transition-all hover:border-amber-500/50 hover:bg-amber-500/[0.08]"
+                    >
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p
+                                    class="text-xs font-bold break-words text-foreground"
+                                >
+                                    {{ l.item }}
+                                </p>
+                                <span
+                                    class="mt-1 inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                >
+                                    {{ l.type }}
+                                </span>
+                            </div>
+                            <span
+                                class="inline-flex shrink-0 rounded-lg bg-amber-500/20 px-2.5 py-1 text-xs font-extrabold text-amber-600 dark:text-amber-400"
+                            >
+                                Sisa {{ l.stock }}
+                            </span>
+                        </div>
+                        <div
+                            class="mt-3 flex items-center justify-between border-t border-border/50 pt-2 text-[11px] text-muted-foreground"
+                        >
+                            <span
+                                >Batas Minimum:
+                                <strong class="text-foreground">{{
+                                    l.min
+                                }}</strong></span
+                            >
+                            <Link
+                                href="/barang-masuk"
+                                class="font-semibold text-[#fb4f00] hover:underline active:scale-95"
+                            >
+                                + Restok
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State if no low stock -->
+            <div
+                v-else
+                class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
+            >
+                <div
+                    class="mb-2 rounded-full bg-emerald-500/10 p-3 text-emerald-500"
+                >
+                    <Package class="size-6" />
+                </div>
+                <p class="text-xs font-bold text-foreground">
+                    Semua Stok Gudang Aman
+                </p>
+                <p class="mt-0.5 text-[11px] text-muted-foreground">
+                    Tidak ada item yang berada di bawah kuota minimum saat ini.
+                </p>
+            </div>
+        </div>
+
+        <!-- 3. Barang Keluar Terbaru (Full-Width Card) -->
+        <div
+            class="w-full min-w-0 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:border-border"
+        >
+            <div
+                class="flex items-center justify-between border-b border-border/70 px-4 py-3.5 sm:px-5 sm:py-4"
+            >
+                <div class="flex min-w-0 items-center gap-2.5">
+                    <div
+                        class="shrink-0 rounded-lg bg-[#fb4f00]/10 p-1.5 text-[#fb4f00]"
                     >
                         <ArrowUpFromLine class="size-4" />
                     </div>
-                    <div>
-                        <h2 class="text-sm font-semibold text-foreground">
+                    <div class="min-w-0">
+                        <h2
+                            class="truncate text-sm font-semibold text-foreground"
+                        >
                             Barang Keluar Terbaru
                         </h2>
-                        <p class="text-xs text-muted-foreground">
+                        <p class="truncate text-xs text-muted-foreground">
                             Pengeluaran perangkat untuk instalasi & pelanggan
                         </p>
                     </div>
                 </div>
                 <Link
                     href="/barang-keluar"
-                    class="group inline-flex items-center gap-1 text-xs font-semibold text-[#fb4f00] hover:underline"
+                    class="group ml-2 inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#fb4f00] hover:underline"
                 >
                     <span>Lihat Semua</span>
                     <ArrowRight
@@ -571,19 +604,24 @@ const stats = computed(() => [
                 <div
                     v-for="r in recentOutgoing"
                     :key="r.id"
-                    class="space-y-2 p-4 transition-colors active:bg-muted/30"
+                    class="space-y-2.5 p-4 transition-colors active:bg-muted/30"
                 >
                     <div class="flex items-start justify-between gap-2">
-                        <div>
-                            <p class="text-xs font-bold text-foreground">
+                        <div class="min-w-0 flex-1">
+                            <p
+                                class="text-xs font-bold break-words text-foreground"
+                            >
                                 {{ r.item }}
                             </p>
-                            <p class="text-[11px] text-muted-foreground">
-                                {{ r.date }} · Ref: {{ r.ref }}
+                            <p class="mt-0.5 text-[11px] text-muted-foreground">
+                                {{ r.date }} · Ref:
+                                <span class="font-mono font-medium">{{
+                                    r.ref
+                                }}</span>
                             </p>
                         </div>
                         <span
-                            class="inline-flex rounded-full bg-[#fb4f00]/15 px-2 py-0.5 text-xs font-bold text-[#fb4f00]"
+                            class="inline-flex shrink-0 rounded-full bg-[#fb4f00]/15 px-2.5 py-1 text-xs font-extrabold text-[#fb4f00]"
                         >
                             -{{ r.qty }}
                         </span>
@@ -591,7 +629,8 @@ const stats = computed(() => [
                     <div
                         class="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground"
                     >
-                        <span class="font-medium text-foreground"
+                        <span
+                            class="max-w-[65%] truncate font-medium text-foreground"
                             >🎯 {{ r.customer }}</span
                         >
                         <span>Petugas: {{ r.user }}</span>
