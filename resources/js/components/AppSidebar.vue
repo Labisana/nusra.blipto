@@ -25,13 +25,21 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useRole } from '@/composables/useRole';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const { canViewReports, canManage, canManageUsers, canApprove } = useRole();
+const { isMobile, setOpenMobile } = useSidebar();
 const page = usePage();
+
+function onNavigate() {
+    if (isMobile.value) {
+        setOpenMobile(false);
+    }
+}
 
 const pendingCount = computed<number>(() => {
     return (page.props as any).pending_approvals_count ?? 0;
@@ -121,7 +129,7 @@ const footerNavItems: NavItem[] = [];
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="dashboard()" @click="onNavigate">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

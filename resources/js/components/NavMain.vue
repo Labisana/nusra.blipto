@@ -16,6 +16,7 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import type { NavItem } from '@/types';
@@ -24,7 +25,14 @@ const props = defineProps<{
     items: NavItem[];
 }>();
 
+const { isMobile, setOpenMobile } = useSidebar();
 const { isCurrentUrl, currentUrl } = useCurrentUrl();
+
+function onNavigate() {
+    if (isMobile.value) {
+        setOpenMobile(false);
+    }
+}
 
 const openMenus = ref<Record<string, boolean>>({});
 
@@ -84,7 +92,10 @@ watch(
                                         as-child
                                         :is-active="isCurrentUrl(subItem.href)"
                                     >
-                                        <Link :href="subItem.href">
+                                        <Link
+                                            :href="subItem.href"
+                                            @click="onNavigate"
+                                        >
                                             <component
                                                 :is="subItem.icon"
                                                 v-if="subItem.icon"
@@ -109,6 +120,7 @@ watch(
                         <Link
                             :href="item.href"
                             class="flex w-full items-center"
+                            @click="onNavigate"
                         >
                             <component :is="item.icon" v-if="item.icon" />
                             <span>{{ item.title }}</span>

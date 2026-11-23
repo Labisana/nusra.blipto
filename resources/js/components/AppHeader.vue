@@ -50,6 +50,7 @@ const props = withDefaults(defineProps<Props>(), {
 const page = usePage();
 const auth = computed(() => page.props.auth);
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+const isMobileMenuOpen = ref(false);
 
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
@@ -82,7 +83,7 @@ const rightNavItems: NavItem[] = [
             <div class="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                 <!-- Mobile Menu -->
                 <div class="lg:hidden">
-                    <Sheet>
+                    <Sheet v-model:open="isMobileMenuOpen">
                         <SheetTrigger :as-child="true">
                             <Button
                                 variant="ghost"
@@ -116,6 +117,7 @@ const rightNavItems: NavItem[] = [
                                                 activeItemStyles,
                                             )
                                         "
+                                        @click="isMobileMenuOpen = false"
                                     >
                                         <component
                                             v-if="item.icon"
